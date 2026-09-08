@@ -133,6 +133,10 @@ const Icon = ({ name, size = 16, style = {} }) => {
     externalLink: <><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></>,
     download: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>,
     luggage: <><path d="M6 20a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2Z"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="12" y1="12" x2="12" y2="12"/><path d="M8 12h8"/></>,
+    mail: <><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></>,
+    helpCircle: <><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></>,
+    alertTriangle: <><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></>,
+    checkCircle: <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>,
   };
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={style}>
@@ -268,21 +272,77 @@ function WelcomePage({ onStart }) {
 
 // Login
 function LoginPage({ onLogin }) {
+  const [step, setStep] = useState("google"); // google | username
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+
+  function handleGoogle() {
+    // Simulate Google OAuth — in production, replace with real OAuth flow
+    const mockEmail = "user@gmail.com";
+    setEmail(mockEmail);
+    setStep("username");
+  }
+
+  function handleFinish() {
+    const trimmed = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
+    if (trimmed.length < 3) { setUsernameError("Username must be at least 3 characters."); return; }
+    if (trimmed.length > 20) { setUsernameError("Username must be 20 characters or less."); return; }
+    save("profile", { name: username.trim(), username: trimmed, email });
+    onLogin({ name: username.trim(), username: trimmed, email });
+  }
+
   return (
     <main className="login-page">
-      <div style={{ width: "100%", maxWidth: 360 }}>
-        <div className="card p-6 text-center shadow-lift">
-          <h1 className="font-display" style={{ fontSize: 36 }}>Wandr</h1>
-          <p className="text-sm text-muted mt-1">Sign in to start planning your next trip.</p>
-          <button className="btn btn-outline w-full" style={{ marginTop: 28, justifyContent: "center" }} onClick={onLogin}>
-            <svg viewBox="0 0 24 24" width="18" height="18" style={{ marginRight: 8 }}>
-              <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.6 5.6 0 0 1-2.4 3.7v3h3.9c2.3-2.1 3.5-5.2 3.5-8.9Z"/>
-              <path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.9-3c-1.1.7-2.4 1.2-4 1.2-3.1 0-5.7-2.1-6.6-4.9H1.4v3.1A12 12 0 0 0 12 24Z"/>
-              <path fill="#FBBC05" d="M5.4 14.4a7.2 7.2 0 0 1 0-4.6V6.7H1.4a12 12 0 0 0 0 10.8l4-3.1Z"/>
-              <path fill="#EA4335" d="M12 4.8c1.8 0 3.4.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.4 6.7l4 3.1C6.3 7 8.9 4.8 12 4.8Z"/>
-            </svg>
-            Continue with Google (demo)
-          </button>
+      <div style={{ width: "100%", maxWidth: 380 }}>
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <h1 className="font-display" style={{ fontSize: 52, color: "#fff", lineHeight: 1 }}>Wandr</h1>
+          <p style={{ color: "rgba(250,250,247,0.6)", fontSize: 14, marginTop: 8 }}>Your AI travel companion</p>
+        </div>
+
+        <div className="card p-6 shadow-lift">
+          {step === "google" && (<>
+            <h2 className="font-display" style={{ fontSize: 22, marginBottom: 4 }}>Welcome back</h2>
+            <p className="text-sm text-muted" style={{ marginBottom: 24 }}>Sign in to start planning your next adventure.</p>
+            <button className="btn btn-outline w-full" style={{ justifyContent: "center", padding: "12px 20px" }} onClick={handleGoogle}>
+              <svg viewBox="0 0 24 24" width="18" height="18" style={{ marginRight: 10, flexShrink: 0 }}>
+                <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.6 5.6 0 0 1-2.4 3.7v3h3.9c2.3-2.1 3.5-5.2 3.5-8.9Z"/>
+                <path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.9-3c-1.1.7-2.4 1.2-4 1.2-3.1 0-5.7-2.1-6.6-4.9H1.4v3.1A12 12 0 0 0 12 24Z"/>
+                <path fill="#FBBC05" d="M5.4 14.4a7.2 7.2 0 0 1 0-4.6V6.7H1.4a12 12 0 0 0 0 10.8l4-3.1Z"/>
+                <path fill="#EA4335" d="M12 4.8c1.8 0 3.4.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.4 6.7l4 3.1C6.3 7 8.9 4.8 12 4.8Z"/>
+              </svg>
+              Continue with Google
+            </button>
+            <p className="text-xs text-muted text-center" style={{ marginTop: 20, lineHeight: 1.6 }}>
+              By continuing you agree to Wandr's Terms of Service and Privacy Policy.
+            </p>
+          </>)}
+
+          {step === "username" && (<>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(200,178,125,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon name="checkCircle" size={18} style={{ color: "var(--accent)" }} />
+              </div>
+              <div>
+                <p className="font-semibold" style={{ fontSize: 13 }}>Signed in with Google</p>
+                <p className="text-xs text-muted">{email}</p>
+              </div>
+            </div>
+            <h2 className="font-display" style={{ fontSize: 22, marginBottom: 4 }}>Pick a username</h2>
+            <p className="text-sm text-muted" style={{ marginBottom: 20 }}>This is shown when you share itineraries with others.</p>
+            <div style={{ position: "relative" }}>
+              <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--muted-fg)", fontSize: 14 }}>@</span>
+              <input className="input" style={{ paddingLeft: 28 }} placeholder="yourname" value={username}
+                onChange={e => { setUsername(e.target.value); setUsernameError(""); }}
+                onKeyDown={e => e.key === "Enter" && handleFinish()} autoFocus />
+            </div>
+            {usernameError && <p className="text-xs" style={{ color: "var(--destructive)", marginTop: 6 }}>{usernameError}</p>}
+            <p className="text-xs text-muted" style={{ marginTop: 8 }}>3–20 characters, letters, numbers and underscores only.</p>
+            <button className="btn btn-amber w-full" style={{ marginTop: 20, justifyContent: "center" }} onClick={handleFinish} disabled={!username.trim()}>
+              Let's go <Icon name="arrowRight" size={15} />
+            </button>
+          </>)}
         </div>
       </div>
     </main>
@@ -330,11 +390,23 @@ function HomePage({ trips, profile, setPage, setCurrentTrip }) {
     <Shell page="home" setPage={setPage}>
       <div className="space-y-6">
 
-        {/* Greeting */}
+        {/* Wandr header */}
         <header style={{ paddingTop: 8 }}>
-          <p className="text-xs font-semibold text-accent" style={{ letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 6 }}>Good to see you</p>
-          <h1 className="page-title">Hey {profile?.name?.split(" ")[0] ?? "there"} ✦</h1>
-          <p className="text-sm text-muted" style={{ marginTop: 4 }}>Where are we going next?</p>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            {/* Logo mark */}
+            <div style={{ width: 44, height: 44, borderRadius: 14, background: "var(--gradient-hero)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8B27D" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
+              </svg>
+            </div>
+            <div>
+              <h1 className="font-display" style={{ fontSize: 28, lineHeight: 1, color: "var(--fg)" }}>Wandr</h1>
+              <p className="text-xs text-muted" style={{ marginTop: 2, letterSpacing: "0.02em" }}>Plan smarter. Explore further.</p>
+            </div>
+          </div>
+          <div style={{ paddingTop: 4 }}>
+            <p className="text-sm text-muted">Hey <strong>{profile?.name?.split(" ")[0] ?? "there"}</strong> ✦ where to next?</p>
+          </div>
         </header>
 
         {/* Plan a New Trip hero card */}
@@ -999,35 +1071,189 @@ function DiscoverPage({ setPage }) {
 }
 
 // Profile
+const FAQ_ITEMS = [
+  { q: "How does Wandr generate itineraries?", a: "Wandr uses Claude, Anthropic's AI, to create personalised day-by-day travel plans based on your destination, dates, interests, and budget. Each itinerary is generated fresh every time." },
+  { q: "Can I edit my itinerary after it's generated?", a: "Yes! Open any trip, tap 'Edit', then tap the pencil icon on any stop to change the name, description, or tips. Hit 'Save Changes' when done." },
+  { q: "How do I share my itinerary?", a: "Open a trip and tap the 'Share' button. A link is copied to your clipboard — send it to anyone. They'll see a read-only view of your itinerary." },
+  { q: "Can I download my itinerary?", a: "Yes — open a trip and tap 'Download PDF'. A print-ready version opens in a new tab. Select 'Save as PDF' in the print dialog to save it to your device." },
+  { q: "Is my data saved if I close the browser?", a: "Yes, your trips are saved locally on your device. As long as you use the same browser, your itineraries will be there when you return." },
+  { q: "How many trips can I save?", a: "Currently up to 5 active trips. Past trips from the last 12 months are also kept for reference." },
+];
+
 function ProfilePage({ profile, trips, setPage, setCurrentTrip, onLogout, onDeleteTrip }) {
+  const [faqOpen, setFaqOpen] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteInput, setDeleteInput] = useState("");
+  const [contactSent, setContactSent] = useState(false);
+  const [contactMsg, setContactMsg] = useState("");
+
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  const yearAgoStr = oneYearAgo.toISOString().slice(0, 10);
+  const recentTrips = trips.filter(t => !t.created_at || t.created_at >= yearAgoStr);
+  const today = new Date().toISOString().slice(0, 10);
+  const upcomingTrips = recentTrips.filter(t => t.end_date >= today);
+  const pastTrips = recentTrips.filter(t => t.end_date < today);
+
+  function handleDeleteAccount() {
+    if (deleteInput.trim().toLowerCase() !== "delete") return;
+    // In production: call API to queue deletion. For now clear local data.
+    save("trips", []);
+    save("profile", null);
+    save("screen", "welcome");
+    onLogout();
+  }
+
+  function handleContact() {
+    if (!contactMsg.trim()) return;
+    // In production: send to support endpoint
+    setContactSent(true);
+    setContactMsg("");
+  }
+
   return (
     <Shell page="profile" setPage={setPage}>
-      <div className="space-y-8">
+      <div className="space-y-6">
+
+        {/* Profile card */}
         <div className="card p-5">
           <div className="flex items-center gap-4">
-            <div className="avatar">{(profile?.name ?? "W").slice(0, 1)}</div>
+            <div className="avatar" style={{ width: 56, height: 56, fontSize: 22 }}>
+              {(profile?.name ?? "W").slice(0, 1).toUpperCase()}
+            </div>
             <div className="min-w-0 flex-1">
-              <p className="font-display truncate" style={{ fontSize: 20 }}>{profile?.name}</p>
-              <p className="text-sm text-muted truncate">{profile?.email}</p>
+              <p className="font-display" style={{ fontSize: 22, lineHeight: 1.2 }}>{profile?.name ?? "Wanderer"}</p>
+              {profile?.username && <p className="text-sm text-accent" style={{ marginTop: 2 }}>@{profile.username}</p>}
+              <div className="flex items-center gap-2 mt-2">
+                <Icon name="mail" size={12} style={{ color: "var(--muted-fg)", flexShrink: 0 }} />
+                <p className="text-sm text-muted truncate">{profile?.email ?? "—"}</p>
+              </div>
             </div>
           </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginTop: 20 }}>
+            {[
+              { label: "Trips saved", val: trips.length },
+              { label: "Upcoming", val: upcomingTrips.length },
+              { label: "Past trips", val: pastTrips.length },
+            ].map(s => (
+              <div key={s.label} style={{ background: "var(--muted)", borderRadius: 10, padding: "12px 10px", textAlign: "center" }}>
+                <p className="font-display" style={{ fontSize: 22 }}>{s.val}</p>
+                <p className="text-xs text-muted" style={{ marginTop: 2 }}>{s.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <section className="space-y-3">
-          <p className="section-title">My Itineraries</p>
-          {trips.length ? trips.map(trip => (
-            <div key={trip.id} className="card p-4">
+
+        {/* Past itineraries — up to 1 year */}
+        <section>
+          <p className="section-title">Past Itineraries</p>
+          <p className="text-xs text-muted" style={{ marginBottom: 12 }}>Trips from the last 12 months</p>
+          {pastTrips.length ? pastTrips.map(trip => (
+            <div key={trip.id} className="card p-4" style={{ marginBottom: 8, cursor: "pointer" }} onClick={() => { setCurrentTrip(trip); setPage("trip"); }}>
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1" style={{ cursor: "pointer" }} onClick={() => { setCurrentTrip(trip); setPage("trip"); }}>
+                <div className="min-w-0 flex-1">
                   <p className="font-medium truncate">{trip.title}</p>
                   <p className="text-sm text-muted">{trip.destination} · {formatRange(trip.start_date, trip.end_date)}</p>
                 </div>
-                <button className="btn btn-ghost btn-icon shrink-0" onClick={() => onDeleteTrip(trip.id)}><Icon name="trash" size={14} /></button>
+                <button className="btn btn-ghost btn-icon shrink-0" onClick={e => { e.stopPropagation(); onDeleteTrip(trip.id); }}>
+                  <Icon name="trash" size={14} />
+                </button>
               </div>
             </div>
-          )) : <p className="text-sm text-muted">No saved itineraries yet.</p>}
+          )) : (
+            <p className="text-sm text-muted">No past trips yet — your completed adventures will appear here.</p>
+          )}
         </section>
-        <button className="btn btn-outline w-full" style={{ justifyContent: "center" }} onClick={onLogout}><Icon name="logOut" size={14} /> Log out</button>
+
+        {/* FAQ */}
+        <section>
+          <div className="flex items-center gap-2" style={{ marginBottom: 12 }}>
+            <Icon name="helpCircle" size={18} style={{ color: "var(--accent)" }} />
+            <p className="section-title" style={{ margin: 0 }}>FAQ</p>
+          </div>
+          <div className="space-y-2">
+            {FAQ_ITEMS.map((item, i) => (
+              <div key={i} className="accordion-item">
+                <button className="accordion-trigger" onClick={() => setFaqOpen(faqOpen === i ? null : i)}>
+                  <span style={{ fontSize: 13, fontWeight: 600, textAlign: "left" }}>{item.q}</span>
+                  <Icon name="chevronDown" size={14} style={{ transform: faqOpen === i ? "rotate(180deg)" : "none", transition: "transform .2s", flexShrink: 0 }} />
+                </button>
+                {faqOpen === i && (
+                  <div style={{ padding: "0 16px 16px" }}>
+                    <p className="text-sm text-muted" style={{ lineHeight: 1.6 }}>{item.a}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Contact Support */}
+        <section>
+          <div className="flex items-center gap-2" style={{ marginBottom: 12 }}>
+            <Icon name="mail" size={18} style={{ color: "var(--accent)" }} />
+            <p className="section-title" style={{ margin: 0 }}>Contact Support</p>
+          </div>
+          <div className="card p-5">
+            {contactSent ? (
+              <div style={{ textAlign: "center", padding: "12px 0" }}>
+                <Icon name="checkCircle" size={28} style={{ color: "var(--accent)", margin: "0 auto 10px" }} />
+                <p className="font-semibold">Message sent!</p>
+                <p className="text-sm text-muted" style={{ marginTop: 4 }}>We'll get back to you within 24–48 hours.</p>
+                <button className="btn btn-ghost btn-sm" style={{ marginTop: 12 }} onClick={() => setContactSent(false)}>Send another</button>
+              </div>
+            ) : (<>
+              <p className="text-sm text-muted" style={{ marginBottom: 12 }}>Have a question or issue? Send us a message and we'll get back to you.</p>
+              <textarea className="textarea" rows={4} placeholder="Describe your issue or question…" value={contactMsg} onChange={e => setContactMsg(e.target.value)} />
+              <div className="flex items-center gap-3" style={{ marginTop: 12 }}>
+                <button className="btn btn-primary btn-sm" onClick={handleContact} disabled={!contactMsg.trim()}>
+                  <Icon name="mail" size={13} /> Send message
+                </button>
+                <p className="text-xs text-muted">or email us at <strong>support@wandr.app</strong></p>
+              </div>
+            </>)}
+          </div>
+        </section>
+
+        {/* Account actions */}
+        <section className="space-y-3">
+          <button className="btn btn-outline w-full" style={{ justifyContent: "center" }} onClick={onLogout}>
+            <Icon name="logOut" size={14} /> Log out
+          </button>
+          <button className="btn w-full" style={{ justifyContent: "center", background: "none", border: "1px solid var(--destructive)", color: "var(--destructive)" }}
+            onClick={() => setShowDeleteConfirm(true)}>
+            <Icon name="trash" size={14} /> Delete account
+          </button>
+        </section>
+
+        <p className="text-xs text-muted text-center" style={{ paddingBottom: 8 }}>Wandr · v1.0 · Built with ♥ and Claude AI</p>
+
       </div>
+
+      {/* Delete account modal */}
+      {showDeleteConfirm && (
+        <div className="modal-overlay" onClick={() => { setShowDeleteConfirm(false); setDeleteInput(""); }}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#fef2f2", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Icon name="alertTriangle" size={18} style={{ color: "var(--destructive)" }} />
+              </div>
+              <p className="modal-title" style={{ margin: 0 }}>Delete account</p>
+            </div>
+            <p className="text-sm text-muted" style={{ lineHeight: 1.6, marginBottom: 16 }}>
+              This will permanently delete your account and all saved itineraries. This action <strong>cannot be undone</strong>.
+            </p>
+            <p className="text-sm" style={{ marginBottom: 8 }}>Type <strong>delete</strong> to confirm:</p>
+            <input className="input" placeholder="delete" value={deleteInput} onChange={e => setDeleteInput(e.target.value)} />
+            <div className="modal-footer">
+              <button className="btn btn-outline btn-sm" onClick={() => { setShowDeleteConfirm(false); setDeleteInput(""); }}>Cancel</button>
+              <button className="btn btn-danger btn-sm" disabled={deleteInput.trim().toLowerCase() !== "delete"} onClick={handleDeleteAccount}>
+                <Icon name="trash" size={13} /> Delete my account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Shell>
   );
 }
@@ -1038,15 +1264,17 @@ export default function App() {
   const [page, setPageRaw] = useState(() => load("page", "home"));
   const [trips, setTrips] = useState(() => load("trips", []));
   const [currentTrip, setCurrentTrip] = useState(null);
-  const profile = { name: "Nayyom", email: "nayyom@example.com" };
+  const [profile, setProfile] = useState(() => load("profile", null));
 
   function setPage(p) { setPageRaw(p); save("page", p); if (p !== "trip") setCurrentTrip(null); }
   function onTripCreated(trip) { const u = [trip, ...trips]; setTrips(u); save("trips", u); setCurrentTrip(trip); setPageRaw("trip"); }
   function onTripUpdated(trip) { const u = trips.map(t => t.id === trip.id ? trip : t); setTrips(u); save("trips", u); }
   function onDeleteTrip(id) { const u = trips.filter(t => t.id !== id); setTrips(u); save("trips", u); }
-  function onLogin() { save("screen", "app"); setScreen("app"); }
-  function onLogout() { save("screen", "welcome"); setScreen("welcome"); setPageRaw("home"); }
+  function onLogin(profileData) { setProfile(profileData); save("profile", profileData); save("screen", "app"); setScreen("app"); }
+  function onLogout() { save("screen", "welcome"); save("page", "home"); setScreen("welcome"); setPageRaw("home"); setProfile(null); }
 
+  // Auto-login if profile already saved (returning user)
+  if (screen === "welcome" && profile) { save("screen", "app"); setScreen("app"); return null; }
   if (screen === "welcome") return <WelcomePage onStart={() => { save("screen", "login"); setScreen("login"); }} />;
   if (screen === "login") return <LoginPage onLogin={onLogin} />;
   if (page === "trip" && currentTrip) return <TripPage trip={currentTrip} setPage={setPage} onTripUpdated={onTripUpdated} onDeleteTrip={onDeleteTrip} />;
