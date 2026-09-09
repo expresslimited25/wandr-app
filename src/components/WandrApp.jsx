@@ -270,6 +270,68 @@ function WelcomePage({ onStart }) {
   );
 }
 
+// Username Page — shown after Google OAuth for new users
+function UsernamePage({ profile, supabase, onComplete }) {
+  const [username, setUsername] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit() {
+    const trimmed = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
+    if (trimmed.length < 3) { setError("Username must be at least 3 characters."); return; }
+    if (trimmed.length > 20) { setError("Username must be 20 characters or less."); return; }
+    setLoading(true);
+    if (supabase) {
+      await supabase.auth.updateUser({ data: { username: trimmed, display_name: profile?.name } });
+    }
+    const profileData = { ...profile, username: trimmed };
+    onComplete(profileData);
+  }
+
+  return (
+    <main className="login-page">
+      <div style={{ width: "100%", maxWidth: 380 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <h1 className="font-display" style={{ fontSize: 52, color: "#fff", lineHeight: 1 }}>Wandr</h1>
+          <p style={{ color: "rgba(250,250,247,0.6)", fontSize: 14, marginTop: 8 }}>Your AI travel companion</p>
+        </div>
+        <div className="card p-6 shadow-lift">
+          {/* Google account confirmed */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, padding: "10px 14px", background: "var(--muted)", borderRadius: 10 }}>
+            {profile?.avatar_url
+              ? <img src={profile.avatar_url} alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }} />
+              : <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700 }}>{(profile?.name ?? "W").slice(0,1)}</div>
+            }
+            <div>
+              <p className="font-semibold" style={{ fontSize: 13 }}>{profile?.name ?? "Google User"}</p>
+              <p className="text-xs text-muted">{profile?.email}</p>
+            </div>
+            <Icon name="checkCircle" size={16} style={{ color: "var(--accent)", marginLeft: "auto", flexShrink: 0 }} />
+          </div>
+
+          <h2 className="font-display" style={{ fontSize: 22, marginBottom: 4 }}>One last thing</h2>
+          <p className="text-sm text-muted" style={{ marginBottom: 20, lineHeight: 1.6 }}>
+            Pick a username — this is shown when you share itineraries with other travellers.
+          </p>
+          <div style={{ position: "relative" }}>
+            <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--muted-fg)", fontSize: 14 }}>@</span>
+            <input className="input" style={{ paddingLeft: 28 }} placeholder="yourname" value={username}
+              onChange={e => { setUsername(e.target.value); setError(""); }}
+              onKeyDown={e => e.key === "Enter" && handleSubmit()} autoFocus />
+          </div>
+          {error && <p className="text-xs" style={{ color: "var(--destructive)", marginTop: 6 }}>{error}</p>}
+          <p className="text-xs text-muted" style={{ marginTop: 8 }}>3–20 characters · letters, numbers and underscores only</p>
+          <button className="btn btn-amber w-full" style={{ marginTop: 20, justifyContent: "center" }}
+            onClick={handleSubmit} disabled={!username.trim() || loading}>
+            {loading ? <Icon name="loader" size={15} style={{ animation: "spin 1s linear infinite" }} /> : null}
+            Let's go <Icon name="arrowRight" size={15} />
+          </button>
+        </div>
+      </div>
+    </main>
+  );
+}
+
 // Login
 function LoginPage({ onLogin, supabase }) {
   const [step, setStep] = useState("google"); // google | username
@@ -1281,19 +1343,25 @@ function ProfilePage({ profile, trips, setPage, setCurrentTrip, onLogout, onDele
 // Root
 export default function App({ session = null, supabase = null }) {
   const [screen, setScreen] = useState(() => {
-    if (session?.user) return "app"; // real OAuth session
+    if (session?.user) {
+      const saved = load("profile", null);
+      // If user logged in via OAuth but hasn't set a username yet, show username prompt
+      if (!saved?.username) return "username";
+      return "app";
+    }
     return load("screen", "welcome");
   });
   const [page, setPageRaw] = useState(() => load("page", "home"));
   const [trips, setTrips] = useState(() => load("trips", []));
   const [currentTrip, setCurrentTrip] = useState(null);
   const [profile, setProfile] = useState(() => {
-    // If we have a real Supabase session, build profile from it
     if (session?.user) {
       const saved = load("profile", null);
-      return saved || {
+      if (saved?.username) return saved; // returning user, fully set up
+      // New OAuth user — store basic info, username still needed
+      return {
         name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Wanderer",
-        username: null, // will prompt on first login
+        username: null,
         email: session.user.email,
         avatar_url: session.user.user_metadata?.avatar_url || null,
       };
@@ -1325,6 +1393,12 @@ export default function App({ session = null, supabase = null }) {
   if (screen === "welcome" && profile) { save("screen", "app"); setScreen("app"); return null; }
   if (screen === "welcome") return <WelcomePage onStart={() => { save("screen", "login"); setScreen("login"); }} />;
   if (screen === "login") return <LoginPage onLogin={onLogin} supabase={supabase} />;
+  if (screen === "username") return <UsernamePage profile={profile} supabase={supabase} onComplete={(profileData) => {
+    setProfile(profileData);
+    save("profile", profileData);
+    save("screen", "app");
+    setScreen("app");
+  }} />;
   if (page === "trip" && currentTrip) return <TripPage trip={currentTrip} setPage={setPage} onTripUpdated={onTripUpdated} onDeleteTrip={onDeleteTrip} />;
   if (page === "plan") return <PlanPage setPage={setPage} onTripCreated={onTripCreated} />;
   if (page === "mytrips") return <MyTripsPage trips={trips} setPage={setPage} setCurrentTrip={t => { setCurrentTrip(t); setPageRaw("trip"); }} onTripCreated={onTripCreated} />;
