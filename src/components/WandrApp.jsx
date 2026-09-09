@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 
 // Inject styles
@@ -171,10 +169,11 @@ function save(k, v) { try { localStorage.setItem("wandr." + k, JSON.stringify(v)
 
 // Claude API — uses the artifact-native Anthropic endpoint (no key needed)
 async function callClaude(system, user, maxTokens = 4000) {
-  const res = await fetch("/api/claude", {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      model: "claude-sonnet-4-6",
       max_tokens: maxTokens,
       system,
       messages: [{ role: "user", content: user }],
@@ -1342,46 +1341,40 @@ function ProfilePage({ profile, trips, setPage, setCurrentTrip, onLogout, onDele
 
 // Root
 export default function App({ session = null, supabase = null }) {
-  const [screen, setScreen] = useState(() => {
+  const [page, setPageRaw] = useState(() => load("page", "home"));
+  const [trips, setTrips] = useState([]);
+  const [tripsLoading, setTripsLoading] = useState(true);
+  const [currentTrip, setCurrentTrip] = useState(null);
+
+  // Resolve screen state
+  const resolveScreen = () => {
     if (session?.user) {
       const saved = load("profile", null);
-      // Only prompt username on very first login — if already set, go straight to app
       if (saved?.username) return "app";
-      // Check if username was saved in Supabase user metadata
       const metaUsername = session.user.user_metadata?.username;
-      if (metaUsername) {
-        // Already has username from previous session — restore and skip prompt
-        const restored = {
-          name: saved?.name || session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Wanderer",
-          username: metaUsername,
-          email: session.user.email,
-          avatar_url: session.user.user_metadata?.avatar_url || null,
-        };
-        save("profile", restored);
-        return "app";
-      }
-      return "username"; // first time only
+      if (metaUsername) { return "app"; }
+      return "username";
     }
     return load("screen", "welcome");
-  });
-  const [page, setPageRaw] = useState(() => load("page", "home"));
-  const [trips, setTrips] = useState(() => load("trips", []));
-  const [currentTrip, setCurrentTrip] = useState(null);
-  const [profile, setProfile] = useState(() => {
+  };
+  const [screen, setScreen] = useState(resolveScreen);
+
+  // Resolve profile state
+  const resolveProfile = () => {
     if (session?.user) {
       const saved = load("profile", null);
-      if (saved?.username) return saved; // localStorage has full profile — use it
-      // Check Supabase metadata for username (cross-device / cleared localStorage)
+      if (saved?.username) return saved;
       const metaUsername = session.user.user_metadata?.username;
       if (metaUsername) {
-        return {
+        const restored = {
           name: session.user.user_metadata?.display_name || session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Wanderer",
           username: metaUsername,
           email: session.user.email,
           avatar_url: session.user.user_metadata?.avatar_url || null,
         };
+        save("profile", restored);
+        return restored;
       }
-      // Brand new user — no username yet
       return {
         name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Wanderer",
         username: null,
@@ -1390,29 +1383,111 @@ export default function App({ session = null, supabase = null }) {
       };
     }
     return load("profile", null);
-  });
+  };
+  const [profile, setProfile] = useState(resolveProfile);
+
+  // Load trips from Supabase when session is available
+  useEffect(() => {
+    if (!supabase || !session?.user) {
+      // Fallback to localStorage if no Supabase session
+      setTrips(load("trips", []));
+      setTripsLoading(false);
+      return;
+    }
+    async function fetchTrips() {
+      setTripsLoading(true);
+      const { data, error } = await supabase
+        .from("trips")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (!error && data) {
+        setTrips(data);
+        save("trips", data); // keep localStorage in sync as cache
+      } else {
+        // Fallback to localStorage cache
+        setTrips(load("trips", []));
+      }
+      setTripsLoading(false);
+    }
+    fetchTrips();
+  }, [session?.user?.id]);
 
   function setPage(p) { setPageRaw(p); save("page", p); if (p !== "trip") setCurrentTrip(null); }
-  function onTripCreated(trip) { const u = [trip, ...trips]; setTrips(u); save("trips", u); setCurrentTrip(trip); setPageRaw("trip"); }
-  function onTripUpdated(trip) { const u = trips.map(t => t.id === trip.id ? trip : t); setTrips(u); save("trips", u); }
-  function onDeleteTrip(id) { const u = trips.filter(t => t.id !== id); setTrips(u); save("trips", u); }
+
+  async function onTripCreated(trip) {
+    if (supabase && session?.user) {
+      const { data, error } = await supabase.from("trips").insert({
+        user_id: session.user.id,
+        title: trip.title,
+        destination: trip.destination,
+        start_date: trip.start_date,
+        end_date: trip.end_date,
+        pax_adults: trip.pax_adults,
+        pax_children: trip.pax_children,
+        interests: trip.interests,
+        budget_range: trip.budget_range,
+        itinerary_data: trip.itinerary_data,
+        share_token: trip.share_token,
+        is_public: false,
+      }).select().single();
+      if (!error && data) {
+        const updated = [data, ...trips];
+        setTrips(updated);
+        save("trips", updated);
+        setCurrentTrip(data);
+        setPageRaw("trip");
+        return;
+      }
+    }
+    // Fallback: localStorage only
+    const updated = [trip, ...trips];
+    setTrips(updated);
+    save("trips", updated);
+    setCurrentTrip(trip);
+    setPageRaw("trip");
+  }
+
+  async function onTripUpdated(trip) {
+    if (supabase && session?.user) {
+      await supabase.from("trips").update({
+        title: trip.title,
+        itinerary_data: trip.itinerary_data,
+        updated_at: new Date().toISOString(),
+      }).eq("id", trip.id).eq("user_id", session.user.id);
+    }
+    const updated = trips.map(t => t.id === trip.id ? trip : t);
+    setTrips(updated);
+    save("trips", updated);
+  }
+
+  async function onDeleteTrip(id) {
+    if (supabase && session?.user) {
+      await supabase.from("trips").delete().eq("id", id).eq("user_id", session.user.id);
+    }
+    const updated = trips.filter(t => t.id !== id);
+    setTrips(updated);
+    save("trips", updated);
+  }
+
   function onLogin(profileData) {
     setProfile(profileData);
     save("profile", profileData);
     save("screen", "app");
     setScreen("app");
   }
+
   async function onLogout() {
     if (supabase) await supabase.auth.signOut();
     save("screen", "welcome");
     save("page", "home");
     save("profile", null);
+    save("trips", []);
     setScreen("welcome");
     setPageRaw("home");
     setProfile(null);
+    setTrips([]);
   }
 
-  // Auto-login if profile already saved (returning user)
   if (screen === "welcome" && profile) { save("screen", "app"); setScreen("app"); return null; }
   if (screen === "welcome") return <WelcomePage onStart={() => { save("screen", "login"); setScreen("login"); }} />;
   if (screen === "login") return <LoginPage onLogin={onLogin} supabase={supabase} />;
@@ -1422,6 +1497,14 @@ export default function App({ session = null, supabase = null }) {
     save("screen", "app");
     setScreen("app");
   }} />;
+
+  if (tripsLoading) return (
+    <div style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12 }}>
+      <Icon name="loader" size={28} style={{ color: "var(--accent)", animation: "spin 1s linear infinite" }} />
+      <p style={{ fontSize: 13, color: "var(--muted-fg)" }}>Loading your trips…</p>
+    </div>
+  );
+
   if (page === "trip" && currentTrip) return <TripPage trip={currentTrip} setPage={setPage} onTripUpdated={onTripUpdated} onDeleteTrip={onDeleteTrip} />;
   if (page === "plan") return <PlanPage setPage={setPage} onTripCreated={onTripCreated} />;
   if (page === "mytrips") return <MyTripsPage trips={trips} setPage={setPage} setCurrentTrip={t => { setCurrentTrip(t); setPageRaw("trip"); }} onTripCreated={onTripCreated} />;
