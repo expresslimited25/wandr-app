@@ -1,28 +1,39 @@
 "use client";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
 import dynamic from "next/dynamic";
 
 const WandrApp = dynamic(() => import("@/components/WandrApp"), { ssr: false });
 
 export default function Page() {
   const [session, setSession] = useState<any>(null);
+  const [supabaseClient, setSupabaseClient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    // Dynamically import supabase only on client side
+    import("@/lib/supabase").then(({ supabase }) => {
+      if (!supabase) {
+        // No supabase client — run without auth
+        setLoading(false);
+        return;
+      }
+      setSupabaseClient(supabase);
+
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session);
+        setLoading(false);
+      });
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+        setSession(session);
+        setLoading(false);
+      });
+
+      return () => subscription.unsubscribe();
+    }).catch((err) => {
+      console.error("Supabase load error:", err);
       setLoading(false);
     });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
   }, []);
 
   if (loading) return (
@@ -31,5 +42,5 @@ export default function Page() {
     </div>
   );
 
-  return <WandrApp session={session} supabase={supabase} />;
+  return <WandrApp session={session} supabase={supabaseClient} />;
 }
