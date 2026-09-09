@@ -1,4 +1,6 @@
-export const metadata = {
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
   title: "Wandr — Your AI Travel Companion",
   description: "Plan smarter, explore further. AI-built itineraries for wherever you're headed.",
 };

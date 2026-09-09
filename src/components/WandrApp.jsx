@@ -271,25 +271,43 @@ function WelcomePage({ onStart }) {
 }
 
 // Login
-function LoginPage({ onLogin }) {
+function LoginPage({ onLogin, supabase }) {
   const [step, setStep] = useState("google"); // google | username
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [usernameError, setUsernameError] = useState("");
 
-  function handleGoogle() {
-    // Simulate Google OAuth — in production, replace with real OAuth flow
-    const mockEmail = "user@gmail.com";
-    setEmail(mockEmail);
-    setStep("username");
+  async function handleGoogle() {
+    if (supabase) {
+      // Real Google OAuth via Supabase
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin + "/auth/callback",
+          queryParams: { prompt: "select_account" },
+        },
+      });
+      if (error) console.error("OAuth error:", error.message);
+      // Page will redirect to Google, then back to /auth/callback
+    } else {
+      // Demo fallback (artifact/local only)
+      const mockEmail = "user@gmail.com";
+      setEmail(mockEmail);
+      setStep("username");
+    }
   }
 
-  function handleFinish() {
+  async function handleFinish() {
     const trimmed = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
     if (trimmed.length < 3) { setUsernameError("Username must be at least 3 characters."); return; }
     if (trimmed.length > 20) { setUsernameError("Username must be 20 characters or less."); return; }
-    save("profile", { name: username.trim(), username: trimmed, email });
-    onLogin({ name: username.trim(), username: trimmed, email });
+    const profileData = { name: username.trim(), username: trimmed, email };
+    // Save username to Supabase user metadata if available
+    if (supabase) {
+      await supabase.auth.updateUser({ data: { username: trimmed, display_name: username.trim() } });
+    }
+    save("profile", profileData);
+    onLogin(profileData);
   }
 
   return (
@@ -1119,7 +1137,9 @@ function ProfilePage({ profile, trips, setPage, setCurrentTrip, onLogout, onDele
         <div className="card p-5">
           <div className="flex items-center gap-4">
             <div className="avatar" style={{ width: 56, height: 56, fontSize: 22 }}>
-              {(profile?.name ?? "W").slice(0, 1).toUpperCase()}
+              {profile?.avatar_url
+                ? <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+                : (profile?.name ?? "W").slice(0, 1).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
               <p className="font-display" style={{ fontSize: 22, lineHeight: 1.2 }}>{profile?.name ?? "Wanderer"}</p>
@@ -1259,24 +1279,52 @@ function ProfilePage({ profile, trips, setPage, setCurrentTrip, onLogout, onDele
 }
 
 // Root
-export default function App() {
-  const [screen, setScreen] = useState(() => load("screen", "welcome"));
+export default function App({ session = null, supabase = null }) {
+  const [screen, setScreen] = useState(() => {
+    if (session?.user) return "app"; // real OAuth session
+    return load("screen", "welcome");
+  });
   const [page, setPageRaw] = useState(() => load("page", "home"));
   const [trips, setTrips] = useState(() => load("trips", []));
   const [currentTrip, setCurrentTrip] = useState(null);
-  const [profile, setProfile] = useState(() => load("profile", null));
+  const [profile, setProfile] = useState(() => {
+    // If we have a real Supabase session, build profile from it
+    if (session?.user) {
+      const saved = load("profile", null);
+      return saved || {
+        name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Wanderer",
+        username: null, // will prompt on first login
+        email: session.user.email,
+        avatar_url: session.user.user_metadata?.avatar_url || null,
+      };
+    }
+    return load("profile", null);
+  });
 
   function setPage(p) { setPageRaw(p); save("page", p); if (p !== "trip") setCurrentTrip(null); }
   function onTripCreated(trip) { const u = [trip, ...trips]; setTrips(u); save("trips", u); setCurrentTrip(trip); setPageRaw("trip"); }
   function onTripUpdated(trip) { const u = trips.map(t => t.id === trip.id ? trip : t); setTrips(u); save("trips", u); }
   function onDeleteTrip(id) { const u = trips.filter(t => t.id !== id); setTrips(u); save("trips", u); }
-  function onLogin(profileData) { setProfile(profileData); save("profile", profileData); save("screen", "app"); setScreen("app"); }
-  function onLogout() { save("screen", "welcome"); save("page", "home"); setScreen("welcome"); setPageRaw("home"); setProfile(null); }
+  function onLogin(profileData) {
+    setProfile(profileData);
+    save("profile", profileData);
+    save("screen", "app");
+    setScreen("app");
+  }
+  async function onLogout() {
+    if (supabase) await supabase.auth.signOut();
+    save("screen", "welcome");
+    save("page", "home");
+    save("profile", null);
+    setScreen("welcome");
+    setPageRaw("home");
+    setProfile(null);
+  }
 
   // Auto-login if profile already saved (returning user)
   if (screen === "welcome" && profile) { save("screen", "app"); setScreen("app"); return null; }
   if (screen === "welcome") return <WelcomePage onStart={() => { save("screen", "login"); setScreen("login"); }} />;
-  if (screen === "login") return <LoginPage onLogin={onLogin} />;
+  if (screen === "login") return <LoginPage onLogin={onLogin} supabase={supabase} />;
   if (page === "trip" && currentTrip) return <TripPage trip={currentTrip} setPage={setPage} onTripUpdated={onTripUpdated} onDeleteTrip={onDeleteTrip} />;
   if (page === "plan") return <PlanPage setPage={setPage} onTripCreated={onTripCreated} />;
   if (page === "mytrips") return <MyTripsPage trips={trips} setPage={setPage} setCurrentTrip={t => { setCurrentTrip(t); setPageRaw("trip"); }} onTripCreated={onTripCreated} />;
