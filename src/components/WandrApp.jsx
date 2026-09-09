@@ -485,7 +485,7 @@ function HomePage({ trips, profile, setPage, setCurrentTrip }) {
             </div>
           </div>
           <div style={{ paddingTop: 4 }}>
-            <p className="text-sm text-muted">Hey <strong>{profile?.name?.split(" ")[0] ?? "there"}</strong> ✦ where to next?</p>
+            <p className="text-sm text-muted">Hey <strong>{profile?.username ? "@" + profile.username : profile?.name?.split(" ")[0] ?? "there"}</strong> ✦ where to next?</p>
           </div>
         </header>
 
@@ -1345,9 +1345,22 @@ export default function App({ session = null, supabase = null }) {
   const [screen, setScreen] = useState(() => {
     if (session?.user) {
       const saved = load("profile", null);
-      // If user logged in via OAuth but hasn't set a username yet, show username prompt
-      if (!saved?.username) return "username";
-      return "app";
+      // Only prompt username on very first login — if already set, go straight to app
+      if (saved?.username) return "app";
+      // Check if username was saved in Supabase user metadata
+      const metaUsername = session.user.user_metadata?.username;
+      if (metaUsername) {
+        // Already has username from previous session — restore and skip prompt
+        const restored = {
+          name: saved?.name || session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Wanderer",
+          username: metaUsername,
+          email: session.user.email,
+          avatar_url: session.user.user_metadata?.avatar_url || null,
+        };
+        save("profile", restored);
+        return "app";
+      }
+      return "username"; // first time only
     }
     return load("screen", "welcome");
   });
@@ -1357,8 +1370,18 @@ export default function App({ session = null, supabase = null }) {
   const [profile, setProfile] = useState(() => {
     if (session?.user) {
       const saved = load("profile", null);
-      if (saved?.username) return saved; // returning user, fully set up
-      // New OAuth user — store basic info, username still needed
+      if (saved?.username) return saved; // localStorage has full profile — use it
+      // Check Supabase metadata for username (cross-device / cleared localStorage)
+      const metaUsername = session.user.user_metadata?.username;
+      if (metaUsername) {
+        return {
+          name: session.user.user_metadata?.display_name || session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Wanderer",
+          username: metaUsername,
+          email: session.user.email,
+          avatar_url: session.user.user_metadata?.avatar_url || null,
+        };
+      }
+      // Brand new user — no username yet
       return {
         name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Wanderer",
         username: null,
