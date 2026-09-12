@@ -8,8 +8,6 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-
-    // Build Gemini request from Claude-style request
     const systemPrompt = body.system || "";
     const userMessage = body.messages?.[0]?.content || "";
     const fullPrompt = systemPrompt + "\n\n" + userMessage;
@@ -35,11 +33,8 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await res.json();
-
-    // Extract text from Gemini response
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-    // Return in Claude-compatible format so WandrApp.jsx doesn't need changes
     return NextResponse.json({
       content: [{ type: "text", text }],
       stop_reason: "end_turn",
