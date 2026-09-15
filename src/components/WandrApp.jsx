@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 
 // Inject styles
@@ -171,10 +169,11 @@ function save(k, v) { try { localStorage.setItem("wandr." + k, JSON.stringify(v)
 
 // Claude API — uses the artifact-native Anthropic endpoint (no key needed)
 async function callClaude(system, user, maxTokens = 4000) {
-  const res = await fetch("/api/claude", {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      model: "claude-sonnet-4-6",
       max_tokens: maxTokens,
       system,
       messages: [{ role: "user", content: user }],
@@ -900,7 +899,7 @@ function ItineraryDisplay({ data, editable, onChange }) {
 }
 
 // Trip page
-function TripPage({ trip: initialTrip, setPage, onTripUpdated, onDeleteTrip }) {
+function TripPage({ trip: initialTrip, setPage, onTripUpdated, onDeleteTrip, pendingTrip, trips, onDeleteAndSavePending, onDiscardPending, maxTrips }) {
   const [trip, setTrip] = useState(initialTrip);
   const [draft, setDraft] = useState(initialTrip?.itinerary_data ?? null);
   const [savedDraft, setSavedDraft] = useState(initialTrip?.itinerary_data ?? null);
@@ -1073,6 +1072,43 @@ function TripPage({ trip: initialTrip, setPage, onTripUpdated, onDeleteTrip }) {
           </div>
         )}
         {draft && <ItineraryDisplay data={draft} editable={editMode} onChange={next => { setDraft(next); setDirty(true); }} />}
+      </div>
+
+      {/* Trip limit modal — shown when user hits 5 trip max */}
+      {pendingTrip && (
+        <div className="modal-overlay">
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(200,178,125,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Icon name="luggage" size={18} style={{ color: "var(--accent)" }} />
+              </div>
+              <p className="modal-title" style={{ margin: 0 }}>Trip limit reached</p>
+            </div>
+            <p className="text-sm text-muted" style={{ lineHeight: 1.6, marginBottom: 16 }}>
+              You have <strong>{maxTrips} saved trips</strong> — the maximum allowed. To save <strong>"{pendingTrip.title}"</strong>, delete one of your existing trips below.
+            </p>
+            <div className="space-y-2" style={{ marginBottom: 20 }}>
+              {(trips || []).map(t => (
+                <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "10px 14px", background: "var(--muted)", borderRadius: 10 }}>
+                  <div className="min-w-0">
+                    <p className="font-medium truncate" style={{ fontSize: 13 }}>{t.title}</p>
+                    <p className="text-xs text-muted">{t.destination} · {formatRange(t.start_date, t.end_date)}</p>
+                  </div>
+                  <button className="btn btn-danger btn-sm shrink-0" onClick={() => onDeleteAndSavePending(t.id)}>
+                    <Icon name="trash" size={12} /> Delete & Save New
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="modal-footer" style={{ marginTop: 0 }}>
+              <button className="btn btn-outline btn-sm" onClick={onDiscardPending}>
+                Discard new trip
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       </div>
     </Shell>
   );
@@ -1345,6 +1381,8 @@ export default function App({ session = null, supabase = null }) {
   const [page, setPageRaw] = useState(() => load("page", "home"));
   const [trips, setTrips] = useState([]);
   const [tripsLoading, setTripsLoading] = useState(true);
+  const [pendingTrip, setPendingTrip] = useState(null); // trip waiting to be saved when at limit
+  const MAX_TRIPS = 5;
   const [currentTrip, setCurrentTrip] = useState(null);
 
   // Resolve screen state
@@ -1415,7 +1453,7 @@ export default function App({ session = null, supabase = null }) {
 
   function setPage(p) { setPageRaw(p); save("page", p); if (p !== "trip") setCurrentTrip(null); }
 
-  async function onTripCreated(trip) {
+  async function saveTripToDb(trip) {
     if (supabase && session?.user) {
       const { data, error } = await supabase.from("trips").insert({
         user_id: session.user.id,
@@ -1446,6 +1484,32 @@ export default function App({ session = null, supabase = null }) {
     save("trips", updated);
     setCurrentTrip(trip);
     setPageRaw("trip");
+  }
+
+  async function onTripCreated(trip) {
+    if (trips.length >= MAX_TRIPS) {
+      // At limit — show the trip limit modal instead of saving
+      setPendingTrip(trip);
+      setCurrentTrip(trip); // show preview
+      setPageRaw("trip");
+      return;
+    }
+    await saveTripToDb(trip);
+  }
+
+  async function onDeleteAndSavePending(deleteId) {
+    // Delete the chosen old trip then save the pending one
+    await onDeleteTrip(deleteId);
+    if (pendingTrip) {
+      await saveTripToDb(pendingTrip);
+      setPendingTrip(null);
+    }
+  }
+
+  function onDiscardPending() {
+    setPendingTrip(null);
+    setCurrentTrip(null);
+    setPageRaw("mytrips");
   }
 
   async function onTripUpdated(trip) {
@@ -1506,7 +1570,7 @@ export default function App({ session = null, supabase = null }) {
     </div>
   );
 
-  if (page === "trip" && currentTrip) return <TripPage trip={currentTrip} setPage={setPage} onTripUpdated={onTripUpdated} onDeleteTrip={onDeleteTrip} />;
+  if (page === "trip" && currentTrip) return <TripPage trip={currentTrip} setPage={setPage} onTripUpdated={onTripUpdated} onDeleteTrip={onDeleteTrip} pendingTrip={pendingTrip} trips={trips} onDeleteAndSavePending={onDeleteAndSavePending} onDiscardPending={onDiscardPending} maxTrips={MAX_TRIPS} />;
   if (page === "plan") return <PlanPage setPage={setPage} onTripCreated={onTripCreated} />;
   if (page === "mytrips") return <MyTripsPage trips={trips} setPage={setPage} setCurrentTrip={t => { setCurrentTrip(t); setPageRaw("trip"); }} onTripCreated={onTripCreated} />;
   if (page === "discover") return <DiscoverPage setPage={setPage} />;
