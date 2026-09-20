@@ -5,7 +5,6 @@ if (!document.getElementById("wandr-styles")) {
   const s = document.createElement("style");
   s.id = "wandr-styles";
   s.textContent = [
-    "@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');",
     "*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}",
     ":root{--bg:#F8F4EF;--fg:#1A1A1A;--card:#FFFFFF;--muted:#EDE8E1;--muted-fg:#7A6F65;--accent:#D4522A;--accent-fg:#FFFFFF;--accent-light:#FEF0EB;--accent-dark:#A33A1A;--border:#E2D9CF;--border-strong:#D0C9BF;--navy:#0D2B1D;--navy-fg:#F8F4EF;--destructive:#C0392B;--font-display:'Playfair Display',Georgia,serif;--font-sans:'Inter',system-ui,sans-serif;--radius:12px;--radius-lg:16px;--shadow-soft:0 1px 3px rgba(26,26,26,.06),0 8px 24px -8px rgba(26,26,26,.12);--shadow-lift:0 16px 40px -12px rgba(26,26,26,.20);--gradient-hero:linear-gradient(140deg,#0D2B1D 0%,#1A4A32 50%,#0D2B1D 100%);--gradient-accent:linear-gradient(135deg,#D4522A,#B83E1C)}",
     "body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;font-size:15px}",
