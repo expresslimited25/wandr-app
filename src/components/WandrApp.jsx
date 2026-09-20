@@ -958,8 +958,6 @@ function TripPage({ trip: initialTrip, setPage, onTripUpdated, onDeleteTrip, pen
 <head>
 <meta charset="utf-8"/>
 <title>${data.trip_title || trip.title}</title>
-<style>
- </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Nunito+Sans:wght@400;500;600&display=swap"/>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
