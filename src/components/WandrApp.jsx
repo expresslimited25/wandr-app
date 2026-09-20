@@ -5,6 +5,7 @@ if (!document.getElementById("wandr-styles")) {
   const s = document.createElement("style");
   s.id = "wandr-styles";
   s.textContent = [
+    "@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');",
     "*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}",
     ":root{--bg:#F8F4EF;--fg:#1A1A1A;--card:#FFFFFF;--muted:#EDE8E1;--muted-fg:#7A6F65;--accent:#D4522A;--accent-fg:#FFFFFF;--accent-light:#FEF0EB;--accent-dark:#A33A1A;--border:#E2D9CF;--border-strong:#D0C9BF;--navy:#0D2B1D;--navy-fg:#F8F4EF;--destructive:#C0392B;--font-display:'Playfair Display',Georgia,serif;--font-sans:'Inter',system-ui,sans-serif;--radius:12px;--radius-lg:16px;--shadow-soft:0 1px 3px rgba(26,26,26,.06),0 8px 24px -8px rgba(26,26,26,.12);--shadow-lift:0 16px 40px -12px rgba(26,26,26,.20);--gradient-hero:linear-gradient(140deg,#0D2B1D 0%,#1A4A32 50%,#0D2B1D 100%);--gradient-accent:linear-gradient(135deg,#D4522A,#B83E1C)}",
     "body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;font-size:15px}",
@@ -168,7 +169,7 @@ function save(k, v) { try { localStorage.setItem("wandr." + k, JSON.stringify(v)
 
 // Claude API — uses the artifact-native Anthropic endpoint (no key needed)
 async function callClaude(system, user, maxTokens = 4000) {
- const res = await fetch("/api/claude", {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -921,35 +922,99 @@ function TripPage({ trip: initialTrip, setPage, onTripUpdated, onDeleteTrip, pen
   function downloadPDF() {
     const data = draft;
     if (!data) return;
+    const BLOCKS = ["morning", "afternoon", "evening"];
+    const BLOCK_LABEL = { morning: "Morning", afternoon: "Afternoon", evening: "Evening" };
+
+    const daysHtml = (data.days || []).map(day => {
+      const blocksHtml = BLOCKS.map(block => {
+        const pois = day[block] || [];
+        if (!pois.length) return "";
+        const poisHtml = pois.map(poi => `
+          <div class="poi">
+            <div class="poi-name">${poi.name || ""}</div>
+            ${poi.cat || poi.category ? `<span class="badge">${poi.cat || poi.category}</span>` : ""}
+            ${poi.dur || poi.duration ? `<span class="dur">${poi.dur || poi.duration}</span>` : ""}
+            <div class="poi-desc">${poi.desc || poi.description || ""}</div>
+            ${poi.tip || poi.tips ? `<div class="poi-tip">Tip · ${poi.tip || poi.tips}</div>` : ""}
+          </div>`).join("");
+        return `<div class="block"><div class="block-label">${BLOCK_LABEL[block]}</div>${poisHtml}</div>`;
+      }).join("");
+      return `
+        <div class="day">
+          <div class="day-header">
+            <span class="day-num">Day ${day.day} · ${day.date}</span>
+            <span class="day-theme">${day.theme}</span>
+          </div>
+          ${blocksHtml}
+        </div>`;
+    }).join("");
+
+    const tipsHtml = (data.tips || data.general_tips || []).length > 0
+      ? `<div class="tips-section"><div class="tips-title">Good to know</div><ul>${(data.tips || data.general_tips).map(t => `<li>${t}</li>`).join("")}</ul></div>`
+      : "";
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>${data.trip_title || trip.title}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Nunito+Sans:wght@400;500;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito Sans', sans-serif; color: #111; background: #fff; padding: 40px; max-width: 760px; margin: 0 auto; }
+  .cover { margin-bottom: 40px; padding-bottom: 24px; border-bottom: 2px solid #E8E4DC; }
+  .cover h1 { font-family: 'Lora', serif; font-size: 32px; color: #111; margin-bottom: 8px; }
+  .cover-meta { display: flex; gap: 24px; font-size: 13px; color: #6B6457; flex-wrap: wrap; margin-top: 8px; }
+  .cover-meta span { display: flex; align-items: center; gap: 4px; }
+  .day { margin-bottom: 32px; page-break-inside: avoid; }
+  .day-header { margin-bottom: 12px; }
+  .day-num { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #C8B27D; }
+  .day-theme { font-family: 'Lora', serif; font-size: 20px; color: #111; }
+  .block { margin-bottom: 16px; padding-left: 12px; border-left: 2px solid #E8E4DC; }
+  .block-label { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #9E9484; margin-bottom: 8px; }
+  .poi { margin-bottom: 12px; }
+  .poi-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .badge { display: inline-block; background: rgba(200,178,125,0.2); color: #111; border: 1px solid #C8B27D; border-radius: 99px; font-size: 10px; font-weight: 600; padding: 2px 8px; margin-right: 6px; }
+  .dur { font-size: 11px; color: #6B6457; }
+  .poi-desc { font-size: 13px; color: #444; line-height: 1.55; margin-top: 4px; }
+  .poi-tip { font-size: 12px; color: #6B6457; background: #F2F0EB; border-radius: 6px; padding: 6px 10px; margin-top: 6px; }
+  .tips-section { margin-top: 32px; padding: 20px; background: rgba(200,178,125,0.08); border: 1px solid rgba(200,178,125,0.3); border-radius: 10px; }
+  .tips-title { font-family: 'Lora', serif; font-size: 16px; margin-bottom: 10px; }
+  .tips-section ul { padding-left: 16px; }
+  .tips-section li { font-size: 13px; color: #6B6457; margin-bottom: 4px; }
+  .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #E8E4DC; font-size: 11px; color: #9E9484; text-align: center; }
+  @media print {
+    body { padding: 20px; }
+    .day { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+  <div class="cover">
+    <h1>${data.trip_title || trip.title}</h1>
+    <div class="cover-meta">
+      <span>📍 ${trip.destination}</span>
+      <span>📅 ${trip.start_date} – ${trip.end_date}</span>
+      <span>👥 ${trip.pax_adults} adults${trip.pax_children ? ", " + trip.pax_children + " children" : ""}</span>
+      ${trip.budget_range ? `<span>💰 ${trip.budget_range}</span>` : ""}
+    </div>
+  </div>
+  ${daysHtml}
+  ${tipsHtml}
+  <div class="footer">Generated by Wandr · wandr.app</div>
+</body>
+</html>`;
+
     const win = window.open("", "_blank");
     if (!win) { showToast("Allow popups to download PDF", "error"); return; }
-    const lines = [];
-    lines.push("<html><head><meta charset='utf-8'/><title>" + (data.trip_title || trip.title) + "</title>");
-    lines.push("<link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Nunito+Sans:wght@400;500;600&display=swap'/>");
-    lines.push("<style>body{font-family:sans-serif;padding:40px;max-width:760px;margin:0 auto;color:#111}.cover{border-bottom:2px solid #E8E4DC;margin-bottom:32px;padding-bottom:20px}h1{font-size:28px;margin-bottom:8px}.meta{font-size:13px;color:#6B6457;margin-top:6px}.day{margin-bottom:28px}.day-num{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#C8B27D}.day-theme{font-size:18px;font-weight:700;margin-bottom:10px}.block{padding-left:12px;border-left:2px solid #E8E4DC;margin-bottom:14px}.block-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#9E9484;margin-bottom:6px}.poi{margin-bottom:10px}.poi-name{font-weight:600;font-size:14px}.poi-desc{font-size:13px;color:#444;line-height:1.5;margin-top:3px}.poi-tip{font-size:12px;color:#6B6457;background:#F2F0EB;border-radius:6px;padding:5px 9px;margin-top:5px}.footer{margin-top:32px;border-top:1px solid #E8E4DC;padding-top:12px;font-size:11px;color:#9E9484;text-align:center}</style>");
-    lines.push("</head><body>");
-    lines.push("<div class='cover'><h1>" + (data.trip_title || trip.title) + "</h1>");
-    lines.push("<div class='meta'>📍 " + trip.destination + " &nbsp;|&nbsp; 📅 " + trip.start_date + " – " + trip.end_date + " &nbsp;|&nbsp; 👥 " + trip.pax_adults + " adults" + (trip.pax_children ? ", " + trip.pax_children + " children" : "") + "</div></div>");
-    (data.days || []).forEach(function(day) {
-      lines.push("<div class='day'><div class='day-num'>Day " + day.day + " · " + day.date + "</div><div class='day-theme'>" + day.theme + "</div>");
-      ["morning","afternoon","evening"].forEach(function(block) {
-        var pois = day[block] || [];
-        if (!pois.length) return;
-        lines.push("<div class='block'><div class='block-label'>" + block.charAt(0).toUpperCase() + block.slice(1) + "</div>");
-        pois.forEach(function(poi) {
-          lines.push("<div class='poi'><div class='poi-name'>" + poi.name + "</div>");
-          lines.push("<div class='poi-desc'>" + (poi.desc || poi.description || "") + "</div>");
-          if (poi.tip || poi.tips) lines.push("<div class='poi-tip'>Tip · " + (poi.tip || poi.tips) + "</div>");
-          lines.push("</div>");
-        });
-        lines.push("</div>");
-      });
-      lines.push("</div>");
-    });
-    lines.push("<div class='footer'>Generated by Wandr · wandr.app</div></body></html>");
-    win.document.write(lines.join(""));
+    win.document.write(html);
     win.document.close();
-    setTimeout(function() { win.focus(); win.print(); }, 500);
+    win.onload = () => {
+      setTimeout(() => {
+        win.focus();
+        win.print();
+      }, 500);
+    };
     showToast("PDF ready — use Save as PDF in the print dialog");
   }
 
@@ -1042,6 +1107,7 @@ function TripPage({ trip: initialTrip, setPage, onTripUpdated, onDeleteTrip, pen
         </div>
       )}
 
+      </div>
     </Shell>
   );
 }
