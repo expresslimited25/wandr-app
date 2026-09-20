@@ -5,77 +5,77 @@ if (!document.getElementById("wandr-styles")) {
   const s = document.createElement("style");
   s.id = "wandr-styles";
   s.textContent = [
-    "@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Nunito+Sans:wght@300;400;500;600;700&display=swap');",
+    "@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');",
     "*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}",
-    ":root{--bg:#FAFAF7;--fg:#111111;--card:#FFFFFF;--muted:#F2F0EB;--muted-fg:#6B6457;--accent:#C8B27D;--accent-fg:#111111;--border:#E8E4DC;--navy:#111111;--navy-fg:#FAFAF7;--destructive:#C0392B;--font-display:'Lora',Georgia,serif;--font-sans:'Nunito Sans',system-ui,sans-serif;--radius:14px;--shadow-soft:0 1px 2px rgba(17,17,17,.06),0 10px 30px -14px rgba(17,17,17,.22);--shadow-lift:0 20px 45px -22px rgba(17,17,17,.40);--gradient-hero:linear-gradient(140deg,#0e0e0e 0%,#1c1a16 45%,#5a4a2a 100%);--gradient-amber:linear-gradient(100deg,#d4b97a,#b8965a)}",
-    "body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);-webkit-font-smoothing:antialiased}",
+    ":root{--bg:#F8F4EF;--fg:#1A1A1A;--card:#FFFFFF;--muted:#EDE8E1;--muted-fg:#7A6F65;--accent:#D4522A;--accent-fg:#FFFFFF;--accent-light:#FEF0EB;--accent-dark:#A33A1A;--border:#E2D9CF;--border-strong:#D0C9BF;--navy:#0D2B1D;--navy-fg:#F8F4EF;--destructive:#C0392B;--font-display:'Playfair Display',Georgia,serif;--font-sans:'Inter',system-ui,sans-serif;--radius:12px;--radius-lg:16px;--shadow-soft:0 1px 3px rgba(26,26,26,.06),0 8px 24px -8px rgba(26,26,26,.12);--shadow-lift:0 16px 40px -12px rgba(26,26,26,.20);--gradient-hero:linear-gradient(140deg,#0D2B1D 0%,#1A4A32 50%,#0D2B1D 100%);--gradient-accent:linear-gradient(135deg,#D4522A,#B83E1C)}",
+    "body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;font-size:15px}",
     ".font-display{font-family:var(--font-display)}",
     ".app-shell{min-height:100vh;background:var(--bg);padding-bottom:96px}",
     ".app-content{max-width:720px;margin:0 auto;padding:24px 16px}",
-    ".bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:40;border-top:1px solid var(--border);background:rgba(255,255,255,.95);backdrop-filter:blur(12px)}",
+    ".bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:40;border-top:2px solid var(--accent);background:rgba(248,244,239,.97);backdrop-filter:blur(16px)}",
     ".bottom-nav-inner{max-width:520px;margin:0 auto;display:flex;justify-content:space-between;padding:6px 8px}",
     ".nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:10px;border:none;background:none;cursor:pointer;color:var(--muted-fg);transition:color .15s;font-family:var(--font-sans)}",
-    ".nav-item:hover{color:var(--fg)}.nav-item.active{color:var(--accent)}",
-    ".nav-label{font-size:11px;font-weight:500}",
-    ".card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border)}",
-    ".card-hero{background-image:var(--gradient-hero);border-radius:var(--radius);border:none;color:var(--navy-fg);box-shadow:var(--shadow-lift)}",
+    ".nav-item:hover{color:var(--fg)}.nav-item.active{color:var(--accent);font-weight:600}",
+    ".nav-label{font-size:10px;font-weight:600;letter-spacing:.04em}",
+    ".card{background:var(--card);border-radius:var(--radius-lg);border:1px solid var(--border);box-shadow:var(--shadow-soft)}",
+    ".card-hero{background-image:var(--gradient-hero);border-radius:var(--radius-lg);border:none;color:var(--navy-fg);box-shadow:var(--shadow-lift)}",
     ".shadow-soft{box-shadow:var(--shadow-soft)}.shadow-lift{box-shadow:var(--shadow-lift)}",
-    ".btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid transparent;cursor:pointer;font-family:var(--font-sans);font-size:14px;font-weight:600;transition:opacity .15s,box-shadow .15s;white-space:nowrap}",
+    ".btn{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;border-radius:8px;border:1px solid transparent;cursor:pointer;font-family:var(--font-sans);font-size:13px;font-weight:600;letter-spacing:.01em;transition:all .15s;white-space:nowrap}",
     ".btn:disabled{opacity:.5;cursor:not-allowed}",
-    ".btn-primary{background:var(--fg);color:var(--navy-fg)}.btn-primary:hover:not(:disabled){opacity:.85}",
-    ".btn-amber{background-image:var(--gradient-amber);color:var(--accent-fg);border:none}.btn-amber:hover:not(:disabled){opacity:.9}",
-    ".btn-outline{background:var(--card);color:var(--fg);border-color:var(--border)}.btn-outline:hover:not(:disabled){background:var(--muted)}",
+    ".btn-primary{background:var(--fg);color:#fff}.btn-primary:hover:not(:disabled){background:#333}",
+    ".btn-amber{background:var(--accent);color:#fff;border:none}.btn-amber:hover:not(:disabled){background:var(--accent-dark)}",
+    ".btn-outline{background:var(--card);color:var(--fg);border-color:var(--border-strong)}.btn-outline:hover:not(:disabled){background:var(--muted)}",
     ".btn-ghost{background:none;border:none;color:var(--fg);padding:8px 12px}.btn-ghost:hover:not(:disabled){background:var(--muted)}",
     ".btn-danger{background:var(--destructive);color:#fff;border:none}",
-    ".btn-sm{padding:6px 14px;font-size:13px}.btn-icon{padding:8px;border-radius:8px}.btn-lg{padding:14px 28px;font-size:15px}",
-    ".input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-family:var(--font-sans);font-size:14px;background:var(--card);color:var(--fg);outline:none;transition:border-color .15s}",
-    ".input:focus{border-color:var(--accent)}",
-    ".textarea{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-family:var(--font-sans);font-size:14px;background:var(--card);color:var(--fg);outline:none;resize:vertical;transition:border-color .15s}",
-    ".textarea:focus{border-color:var(--accent)}",
+    ".btn-sm{padding:7px 14px;font-size:12px}.btn-icon{padding:8px;border-radius:8px}.btn-lg{padding:14px 32px;font-size:15px;letter-spacing:.02em}",
+    ".input{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-sans);font-size:14px;background:var(--card);color:var(--fg);outline:none;transition:border-color .15s}",
+    ".input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,82,42,.1)}",
+    ".textarea{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-sans);font-size:14px;background:var(--card);color:var(--fg);outline:none;resize:vertical;transition:border-color .15s}",
+    ".textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,82,42,.1)}",
     ".label{font-size:13px;font-weight:600;color:var(--fg);display:block;margin-bottom:6px}",
-    ".badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:500;background:var(--muted);color:var(--fg);border:1px solid var(--border)}",
-    ".badge-accent{background:rgba(200,178,125,.2);color:var(--accent-fg);border-color:var(--accent)}",
-    ".progress-track{height:6px;background:var(--muted);border-radius:99px;overflow:hidden}",
-    ".progress-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .4s ease}",
-    ".chip{padding:6px 14px;border-radius:99px;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:13px;font-weight:500;color:var(--fg);transition:background .15s,border-color .15s}",
-    ".chip:hover{background:var(--muted)}.chip.active{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}",
+    ".badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;background:var(--muted);color:var(--muted-fg);border:none}",
+    ".badge-accent{background:var(--accent-light);color:var(--accent-dark)}",
+    ".progress-track{height:3px;background:var(--muted);border-radius:99px;overflow:hidden}",
+    ".progress-fill{height:100%;background:var(--accent);transition:width .4s ease}",
+    ".chip{padding:6px 16px;border-radius:4px;border:1px solid var(--border-strong);background:var(--card);cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.03em;color:var(--fg);transition:all .15s}",
+    ".chip:hover{background:var(--muted);border-color:var(--border-strong)}.chip.active{background:var(--accent);border-color:var(--accent);color:#fff}",
     ".hero-page{min-height:100vh;background-image:var(--gradient-hero);display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden}",
     ".hero-blob-1{position:absolute;top:40px;left:-96px;width:400px;height:400px;border-radius:50%;background:rgba(200,178,125,.2);filter:blur(80px);pointer-events:none}",
     ".hero-blob-2{position:absolute;bottom:0;right:-80px;width:480px;height:480px;border-radius:50%;background:rgba(50,40,20,.6);filter:blur(80px);pointer-events:none}",
     ".hero-inner{position:relative;z-index:1;max-width:480px;text-align:center}",
-    ".hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:.4em;text-transform:uppercase;color:var(--accent)}",
-    ".hero-title{font-family:var(--font-display);font-size:clamp(64px,15vw,96px);font-weight:600;color:var(--navy-fg);line-height:1;margin-top:16px}",
-    ".hero-sub{margin-top:20px;font-size:17px;color:rgba(250,250,247,.8);line-height:1.5}",
+    ".hero-eyebrow{font-size:10px;font-weight:600;letter-spacing:.4em;text-transform:uppercase;color:var(--accent)}",
+    ".hero-title{font-family:var(--font-display);font-size:clamp(72px,16vw,104px);font-weight:700;color:var(--navy-fg);line-height:.95;margin-top:16px;letter-spacing:-.02em}",
+    ".hero-sub{margin-top:20px;font-size:16px;color:rgba(248,244,239,.65);line-height:1.6;font-weight:300;letter-spacing:.02em}",
     ".login-page{min-height:100vh;background-image:var(--gradient-hero);display:flex;align-items:center;justify-content:center;padding:24px}",
-    ".section-title{font-family:var(--font-display);font-size:20px;color:var(--fg);margin-bottom:12px}",
-    ".page-title{font-family:var(--font-display);font-size:clamp(26px,6vw,32px);color:var(--fg);margin-bottom:4px}",
+    ".section-title{font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--fg);margin-bottom:12px;letter-spacing:-.01em}",
+    ".page-title{font-family:var(--font-display);font-size:clamp(28px,6vw,36px);font-weight:700;color:var(--fg);margin-bottom:4px;letter-spacing:-.02em}",
     ".skeleton{background:linear-gradient(90deg,var(--muted) 25%,var(--border) 50%,var(--muted) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius)}",
     "@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}",
     "@keyframes spin{to{transform:rotate(360deg)}}",
     ".spin{animation:spin 1s linear infinite}",
-    ".accordion-item{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow-soft)}",
-    ".accordion-trigger{width:100%;padding:16px;display:flex;justify-content:space-between;align-items:center;border:none;background:none;cursor:pointer;text-align:left;font-family:var(--font-sans)}",
+    ".accordion-item{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}",
+    ".accordion-trigger{width:100%;padding:18px 16px;display:flex;justify-content:space-between;align-items:center;border:none;background:none;cursor:pointer;text-align:left;font-family:var(--font-sans)}",
     ".accordion-trigger:hover{background:var(--muted)}",
     ".accordion-content{padding:0 16px 20px;border-top:1px solid var(--border)}",
-    ".trip-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:box-shadow .2s}",
-    ".trip-card:hover{box-shadow:var(--shadow-lift)}",
+    ".trip-card{background:var(--card);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:all .2s;border-left:3px solid var(--accent)}",
+    ".trip-card:hover{box-shadow:var(--shadow-lift);transform:translateY(-1px)}",
     ".trip-card-img{width:100%;height:120px;object-fit:cover}",
     ".trip-card-body{padding:14px}",
-    ".trip-card-title{font-family:var(--font-display);font-size:17px;line-height:1.3}",
+    ".trip-card-title{font-family:var(--font-display);font-size:18px;font-weight:700;line-height:1.2;letter-spacing:-.01em}",
     ".trip-card-meta{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px;font-size:13px;color:var(--muted-fg)}",
-    ".poi-card{background:var(--card);border-radius:var(--radius);border:1px solid rgba(0,0,0,.07);padding:14px}",
+    ".poi-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:16px;border-left:3px solid var(--muted)}",
     ".stepper-row{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);border-radius:12px;padding:12px 16px}",
     ".stepper-controls{display:flex;align-items:center;gap:16px}",
     ".stepper-val{font-size:18px;font-weight:700;min-width:24px;text-align:center}",
     ".modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}",
-    ".modal{background:var(--card);border-radius:var(--radius);width:100%;max-width:480px;padding:24px;box-shadow:var(--shadow-lift)}",
-    ".modal-title{font-family:var(--font-display);font-size:20px;margin-bottom:16px}",
+    ".modal{background:var(--card);border-radius:var(--radius-lg);width:100%;max-width:480px;padding:28px;box-shadow:var(--shadow-lift)}",
+    ".modal-title{font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:-.01em;margin-bottom:16px}",
     ".modal-footer{display:flex;justify-content:space-between;gap:8px;margin-top:20px}",
     ".tip-block{background:var(--muted);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--muted-fg)}",
-    ".gen-screen{min-height:100vh;background-image:var(--gradient-hero);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}",
+    ".gen-screen{min-height:100vh;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}",
     ".discover-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:box-shadow .2s;height:100%}",
-    ".discover-card:hover{box-shadow:var(--shadow-lift)}",
-    ".discover-card-img{width:100%;height:140px;background-image:var(--gradient-hero)}",
+    ".discover-card:hover{box-shadow:var(--shadow-lift);transform:translateY(-2px)}",
+    ".discover-card-img{width:100%;height:140px;background:var(--navy)}",
     ".discover-card-body{padding:14px}",
     ".grid-2{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}",
     ".space-y-2>*+*{margin-top:8px}.space-y-3>*+*{margin-top:12px}.space-y-4>*+*{margin-top:16px}.space-y-5>*+*{margin-top:20px}.space-y-6>*+*{margin-top:24px}.space-y-8>*+*{margin-top:32px}",
@@ -83,7 +83,7 @@ if (!document.getElementById("wandr-styles")) {
     ".gap-2{gap:8px}.gap-3{gap:12px}.gap-4{gap:16px}",
     ".truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
     ".text-sm{font-size:13px}.text-xs{font-size:11px}.font-medium{font-weight:500}.font-semibold{font-weight:600}",
-    ".text-muted{color:var(--muted-fg)}.text-accent{color:var(--accent)}.text-white{color:var(--navy-fg)}",
+    ".text-muted{color:var(--muted-fg)}.text-accent{color:var(--accent)}.text-white{color:var(--navy-fg)}.text-uppercase{text-transform:uppercase;letter-spacing:.08em}",
     ".w-full{width:100%}.mt-1{margin-top:4px}.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}.mt-5{margin-top:20px}.mt-6{margin-top:24px}.mt-8{margin-top:32px}",
     ".mb-2{margin-bottom:8px}.p-4{padding:16px}.p-5{padding:20px}.p-6{padding:24px}",
     ".rounded-xl{border-radius:var(--radius)}.text-center{text-align:center}.underline{text-decoration:underline}",
@@ -92,10 +92,10 @@ if (!document.getElementById("wandr-styles")) {
     ".review-table{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}",
     ".review-row{display:flex;justify-content:space-between;gap:16px;padding:10px 16px;font-size:13px}",
     ".review-row+.review-row{border-top:1px solid var(--border)}",
-    ".review-row dt{color:var(--muted-fg)}.review-row dd{font-weight:500;text-align:right}",
-    ".inspire-card{background:rgba(200,178,125,.1);border:1px solid rgba(200,178,125,.3);border-radius:var(--radius);padding:20px}",
-    ".inspire-result{background:var(--card);border-radius:10px;padding:16px;margin-top:16px}",
-    ".avatar{width:48px;height:48px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;color:var(--accent-fg);flex-shrink:0;overflow:hidden}",
+    ".review-row dt{color:var(--muted-fg);font-size:12px;font-weight:500;letter-spacing:.03em;text-transform:uppercase}.review-row dd{font-weight:600;text-align:right;font-family:var(--font-display)}",
+    ".inspire-card{background:var(--accent-light);border:1px solid rgba(212,82,42,.2);border-radius:var(--radius-lg);padding:20px}",
+    ".inspire-result{background:var(--card);border-radius:var(--radius);padding:18px;margin-top:16px;border:1px solid var(--border)}",
+    ".avatar{width:48px;height:48px;border-radius:50%;background:var(--fg);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden}",
     ".avatar img{width:100%;height:100%;object-fit:cover}",
     ".poi-link{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:3px;font-weight:500;opacity:.75;font-size:12px}",
     ".poi-link:hover{opacity:1;text-decoration:underline}",
@@ -260,10 +260,11 @@ function WelcomePage({ onStart }) {
       <div className="hero-blob-1" />
       <div className="hero-blob-2" />
       <div className="hero-inner">
-        <p className="hero-eyebrow">Welcome to</p>
+        <p className="hero-eyebrow">Your AI Travel Companion</p>
         <h1 className="hero-title font-display">Wandr</h1>
-        <p className="hero-sub">Your AI travel companion. Plan smarter, explore further.</p>
-        <button className="btn btn-amber btn-lg" style={{ marginTop: 40 }} onClick={onStart}>Start Exploring</button>
+        <p className="hero-sub">Plan smarter. Explore further. Day-by-day itineraries built around you.</p>
+        <button className="btn btn-amber btn-lg" style={{ marginTop: 44 }} onClick={onStart}>Start Exploring</button>
+        <p style={{ marginTop: 16, fontSize: 11, color: "rgba(248,244,239,.35)", letterSpacing: ".08em", textTransform: "uppercase" }}>Free · AI-powered · No signup required to explore</p>
       </div>
     </main>
   );
@@ -291,7 +292,7 @@ function UsernamePage({ profile, supabase, onComplete }) {
     <main className="login-page">
       <div style={{ width: "100%", maxWidth: 380 }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <h1 className="font-display" style={{ fontSize: 52, color: "#fff", lineHeight: 1 }}>Wandr</h1>
+          <h1 className="font-display" style={{ fontSize: 58, color: "#fff", lineHeight: .95, fontWeight: 700, letterSpacing: "-.03em" }}>Wandr</h1>
           <p style={{ color: "rgba(250,250,247,0.6)", fontSize: 14, marginTop: 8 }}>Your AI travel companion</p>
         </div>
         <div className="card p-6 shadow-lift">
@@ -376,13 +377,13 @@ function LoginPage({ onLogin, supabase }) {
       <div style={{ width: "100%", maxWidth: 380 }}>
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <h1 className="font-display" style={{ fontSize: 52, color: "#fff", lineHeight: 1 }}>Wandr</h1>
+          <h1 className="font-display" style={{ fontSize: 58, color: "#fff", lineHeight: .95, fontWeight: 700, letterSpacing: "-.03em" }}>Wandr</h1>
           <p style={{ color: "rgba(250,250,247,0.6)", fontSize: 14, marginTop: 8 }}>Your AI travel companion</p>
         </div>
 
         <div className="card p-6 shadow-lift">
           {step === "google" && (<>
-            <h2 className="font-display" style={{ fontSize: 22, marginBottom: 4 }}>Welcome back</h2>
+            <h2 className="font-display" style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-.02em", marginBottom: 4 }}>Welcome back</h2>
             <p className="text-sm text-muted" style={{ marginBottom: 24 }}>Sign in to start planning your next adventure.</p>
             <button className="btn btn-outline w-full" style={{ justifyContent: "center", padding: "12px 20px" }} onClick={handleGoogle}>
               <svg viewBox="0 0 24 24" width="18" height="18" style={{ marginRight: 10, flexShrink: 0 }}>
@@ -435,7 +436,7 @@ function GenScreen({ destination }) {
   return (
     <main className="gen-screen">
       <Icon name="loader" size={32} style={{ color: "var(--accent)", animation: "spin 1s linear infinite" }} />
-      <h1 className="font-display text-white" style={{ fontSize: 28, marginTop: 24 }}>Mapping out {destination}…</h1>
+      <h1 className="font-display text-white" style={{ fontSize: 30, marginTop: 24, fontWeight: 700, letterSpacing: "-.02em" }}>Mapping out {destination}…</h1>
       <p className="text-white" style={{ marginTop: 16, maxWidth: 360, fontSize: 14, opacity: 0.75, lineHeight: 1.6 }}>{TRAVEL_TIPS[tip]}</p>
     </main>
   );
@@ -469,44 +470,44 @@ function HomePage({ trips, profile, setPage, setCurrentTrip }) {
     <Shell page="home" setPage={setPage}>
       <div className="space-y-6">
 
-        {/* Wandr header */}
-        <header style={{ paddingTop: 8 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-            {/* Logo mark */}
-            <div style={{ width: 44, height: 44, borderRadius: 14, background: "var(--gradient-hero)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8B27D" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
-              </svg>
+        {/* Wandr masthead */}
+        <header>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: 20, borderBottom: "1px solid var(--border)", marginBottom: 28 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 8, background: "var(--navy)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4522A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
+                </svg>
+              </div>
+              <span className="font-display" style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-.02em" }}>Wandr</span>
             </div>
-            <div>
-              <h1 className="font-display" style={{ fontSize: 28, lineHeight: 1, color: "var(--fg)" }}>Wandr</h1>
-              <p className="text-xs text-muted" style={{ marginTop: 2, letterSpacing: "0.02em" }}>Plan smarter. Explore further.</p>
-            </div>
+            <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted-fg)" }}>
+              {profile?.username ? "@" + profile.username : profile?.name?.split(" ")[0] ?? ""}
+            </p>
           </div>
-          <div style={{ paddingTop: 4 }}>
-            <p className="text-sm text-muted">Hey <strong>{profile?.username ? "@" + profile.username : profile?.name?.split(" ")[0] ?? "there"}</strong> ✦ where to next?</p>
+          <div>
+            <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: ".15em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 6 }}>Good to see you</p>
+            <h1 className="page-title">Where to next?</h1>
           </div>
         </header>
 
         {/* Plan a New Trip hero card */}
-        <div className="card-hero p-6" style={{ position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(200,178,125,0.15)", filter: "blur(40px)", pointerEvents: "none" }} />
-          <p className="text-xs font-semibold" style={{ letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 10 }}>AI-Powered Planning</p>
-          <h2 className="font-display text-white" style={{ fontSize: 26, lineHeight: 1.2 }}>Plan a New Trip</h2>
-          <p className="text-white" style={{ marginTop: 8, fontSize: 13, opacity: 0.7, maxWidth: 300, lineHeight: 1.6 }}>
+        <div className="card-hero" style={{ padding: "32px 28px", position: "relative", overflow: "hidden" }}>
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 12 }}>AI-Powered Planning</p>
+          <h2 className="font-display" style={{ fontSize: 30, fontWeight: 700, color: "var(--navy-fg)", lineHeight: 1.1, letterSpacing: "-.02em", maxWidth: 280 }}>Plan your next adventure</h2>
+          <p style={{ marginTop: 10, fontSize: 13, color: "rgba(248,244,239,.6)", maxWidth: 300, lineHeight: 1.65, fontWeight: 300 }}>
             Tell Wandr where and when — get a full day-by-day itinerary in under a minute.
           </p>
-          {/* Inline destination quick-start */}
           <div style={{ marginTop: 20, display: "flex", gap: 8, flexWrap: "wrap" }}>
             {QUICK_INSPO.map(q => (
               <button key={q} onClick={() => setPage("plan")}
-                style={{ padding: "6px 14px", borderRadius: 99, border: "1px solid rgba(200,178,125,0.4)", background: "rgba(200,178,125,0.12)", color: "rgba(250,250,247,0.9)", cursor: "pointer", fontSize: 12, fontWeight: 500, backdropFilter: "blur(4px)" }}>
+                style={{ padding: "5px 12px", borderRadius: 4, border: "1px solid rgba(248,244,239,.2)", background: "rgba(248,244,239,.08)", color: "rgba(248,244,239,.8)", cursor: "pointer", fontSize: 11, fontWeight: 500, letterSpacing: ".02em" }}>
                 {q}
               </button>
             ))}
           </div>
-          <button className="btn btn-amber" style={{ marginTop: 20 }} onClick={() => setPage("plan")}>
-            <Icon name="sparkles" size={15} /> Start planning
+          <button className="btn btn-amber" style={{ marginTop: 24 }} onClick={() => setPage("plan")}>
+            <Icon name="sparkles" size={14} /> Start planning
           </button>
         </div>
 
@@ -559,12 +560,9 @@ function HomePage({ trips, profile, setPage, setCurrentTrip }) {
         </section>
 
         {/* Travel tip of the day */}
-        <div style={{ background: "var(--muted)", borderRadius: "var(--radius)", padding: "16px 20px", display: "flex", gap: 14, alignItems: "flex-start" }}>
-          <span style={{ fontSize: 20, flexShrink: 0 }}>✦</span>
-          <div>
-            <p className="text-xs font-semibold text-accent" style={{ letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 4 }}>Wandr Tip</p>
-            <p className="text-sm text-muted" style={{ lineHeight: 1.6 }}>{TRAVEL_TIPS[new Date().getDay() % TRAVEL_TIPS.length]}</p>
-          </div>
+        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20 }}>
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: ".15em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 8 }}>Tip of the day</p>
+          <p style={{ fontSize: 13, color: "var(--muted-fg)", lineHeight: 1.65, fontStyle: "italic", fontFamily: "var(--font-display)" }}>"{TRAVEL_TIPS[new Date().getDay() % TRAVEL_TIPS.length]}"</p>
         </div>
 
       </div>
@@ -589,8 +587,8 @@ function MyTripsPage({ trips, setPage, setCurrentTrip, onTripCreated }) {
 
         {/* Plan new trip CTA */}
         <button onClick={() => setPage("plan")} style={{ width: "100%", background: "var(--card)", border: "2px dashed var(--border)", borderRadius: "var(--radius)", padding: "18px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer", transition: "border-color 0.15s, background 0.15s", textAlign: "left" }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.background = "rgba(200,178,125,0.05)"; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.background = "var(--card)"; }}>
+          onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.background = "var(--accent-light)"; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border-strong)"; e.currentTarget.style.background = "var(--card)"; }}>
           <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(200,178,125,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <Icon name="sparkles" size={20} style={{ color: "var(--accent)" }} />
           </div>
@@ -685,7 +683,7 @@ function PlanPage({ setPage, onTripCreated }) {
     <Shell page="mytrips" setPage={setPage}>
       <div className="space-y-6">
         <div>
-          <p className="text-xs font-semibold text-accent" style={{ letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 8 }}>
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 10 }}>
             Step {step + 1} of {STEPS.length} · {STEPS[step]}
           </p>
           <div className="progress-track"><div className="progress-fill" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} /></div>
@@ -836,8 +834,8 @@ function ItineraryDisplay({ data, editable, onChange }) {
           <div key={key} className="accordion-item">
             <button className="accordion-trigger" onClick={() => setOpen(o => isOpen ? o.filter(k => k !== key) : [...o, key])}>
               <div>
-                <span className="text-xs font-semibold text-accent" style={{ display: "block", letterSpacing: "0.2em", textTransform: "uppercase" }}>Day {day.day ?? dayIndex + 1} · {day.date}</span>
-                <span className="font-display" style={{ fontSize: 17 }}>{day.theme}</span>
+                <span style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 2 }}>Day {day.day ?? dayIndex + 1} · {day.date}</span>
+                <span className="font-display" style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-.01em" }}>{day.theme}</span>
               </div>
               <Icon name="chevronDown" size={16} style={{ transform: isOpen ? "rotate(180deg)" : "none", transition: "transform .25s", flexShrink: 0 }} />
             </button>
@@ -848,7 +846,7 @@ function ItineraryDisplay({ data, editable, onChange }) {
                   if (!pois.length) return null;
                   return (
                     <div key={block} className="space-y-3">
-                      <h4 className="text-xs font-semibold text-muted" style={{ letterSpacing: "0.2em", textTransform: "uppercase" }}>{BLOCK_LABEL[block]}</h4>
+                      <h4 style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 4 }}>{BLOCK_LABEL[block]}</h4>
                       {pois.map((poi, poiIndex) => (
                         <div key={poi.name + poiIndex} className="poi-card">
                           <div className="flex items-start justify-between gap-3">
@@ -888,7 +886,7 @@ function ItineraryDisplay({ data, editable, onChange }) {
       })}
       {((data?.tips || data?.general_tips) || []).length > 0 && (
         <div style={{ background: "rgba(200,178,125,.1)", border: "1px solid rgba(200,178,125,.3)", borderRadius: "var(--radius)", padding: 20 }}>
-          <h3 className="font-display" style={{ fontSize: 18 }}>Good to know</h3>
+          <h3 className="font-display" style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-.01em" }}>Good to know</h3>
           <ul className="mt-2 space-y-2">{(data.tips || data.general_tips || []).map(tip => <li key={tip} className="text-sm text-muted">· {tip}</li>)}</ul>
         </div>
       )}
@@ -1145,7 +1143,7 @@ function DiscoverPage({ setPage }) {
         <div style={{ background: "rgba(200,178,125,.1)", border: "1px solid rgba(200,178,125,.3)", borderRadius: "var(--radius)", padding: 20 }}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="font-display" style={{ fontSize: 20 }}>Inspire Me</h2>
+              <h2 className="font-display" style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-.01em" }}>Inspire Me</h2>
               <p className="text-sm text-muted">One underrated destination, picked by AI.</p>
             </div>
             <button className="btn btn-primary btn-sm" onClick={getIdea} disabled={thinking}>
@@ -1155,7 +1153,7 @@ function DiscoverPage({ setPage }) {
           {error && <p className="text-sm mt-2" style={{ color: "var(--destructive)" }}>{error}</p>}
           {idea && (
             <div style={{ background: "var(--card)", borderRadius: 10, padding: 16, marginTop: 16 }}>
-              <p className="font-display" style={{ fontSize: 17 }}>{idea.destination}, {idea.country}</p>
+              <p className="font-display" style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-.01em" }}>{idea.destination}, {idea.country}</p>
               <p className="text-sm font-medium" style={{ color: "var(--accent)", marginTop: 2 }}>{idea.tagline}</p>
               <p className="text-sm text-muted mt-2" style={{ lineHeight: 1.55 }}>{idea.description}</p>
               <p className="text-xs text-muted mt-2">Best time: {idea.best_time}</p>
@@ -1250,12 +1248,12 @@ function ProfilePage({ profile, trips, setPage, setCurrentTrip, onLogout, onDele
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginTop: 20 }}>
             {[
-              { label: "Trips saved", val: trips.length },
+              { label: "Saved", val: trips.length },
               { label: "Upcoming", val: upcomingTrips.length },
-              { label: "Past trips", val: pastTrips.length },
+              { label: "Past", val: pastTrips.length },
             ].map(s => (
               <div key={s.label} style={{ background: "var(--muted)", borderRadius: 10, padding: "12px 10px", textAlign: "center" }}>
-                <p className="font-display" style={{ fontSize: 22 }}>{s.val}</p>
+                <p className="font-display" style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-.02em" }}>{s.val}</p>
                 <p className="text-xs text-muted" style={{ marginTop: 2 }}>{s.label}</p>
               </div>
             ))}
@@ -1287,7 +1285,7 @@ function ProfilePage({ profile, trips, setPage, setCurrentTrip, onLogout, onDele
         <section>
           <div className="flex items-center gap-2" style={{ marginBottom: 12 }}>
             <Icon name="helpCircle" size={18} style={{ color: "var(--accent)" }} />
-            <p className="section-title" style={{ margin: 0 }}>FAQ</p>
+            <p style={{ fontFamily: "var(--font-display)", fontSize: 19, fontWeight: 700, letterSpacing: "-.01em", margin: 0 }}>FAQ</p>
           </div>
           <div className="space-y-2">
             {FAQ_ITEMS.map((item, i) => (
@@ -1310,7 +1308,7 @@ function ProfilePage({ profile, trips, setPage, setCurrentTrip, onLogout, onDele
         <section>
           <div className="flex items-center gap-2" style={{ marginBottom: 12 }}>
             <Icon name="mail" size={18} style={{ color: "var(--accent)" }} />
-            <p className="section-title" style={{ margin: 0 }}>Contact Support</p>
+            <p style={{ fontFamily: "var(--font-display)", fontSize: 19, fontWeight: 700, letterSpacing: "-.01em", margin: 0 }}>Contact Support</p>
           </div>
           <div className="card p-5">
             {contactSent ? (
