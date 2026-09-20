@@ -959,7 +959,9 @@ function TripPage({ trip: initialTrip, setPage, onTripUpdated, onDeleteTrip, pen
 <meta charset="utf-8"/>
 <title>${data.trip_title || trip.title}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Nunito+Sans:wght@400;500;600&display=swap');
+ </style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Nunito+Sans:wght@400;500;600&display=swap"/>
+<style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Nunito Sans', sans-serif; color: #111; background: #fff; padding: 40px; max-width: 760px; margin: 0 auto; }
   .cover { margin-bottom: 40px; padding-bottom: 24px; border-bottom: 2px solid #E8E4DC; }
