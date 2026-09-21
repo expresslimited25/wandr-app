@@ -169,7 +169,7 @@ function save(k, v) { try { localStorage.setItem("wandr." + k, JSON.stringify(v)
 
 // Claude API — uses the artifact-native Anthropic endpoint (no key needed)
 async function callClaude(system, user, maxTokens = 4000) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  const res = await fetch("/api/claude", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
