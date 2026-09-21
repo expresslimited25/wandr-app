@@ -1106,8 +1106,6 @@ function TripPage({ trip: initialTrip, setPage, onTripUpdated, onDeleteTrip, pen
           </div>
         </div>
       )}
-
-      </div>
     </Shell>
   );
 }
