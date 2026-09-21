@@ -6,7 +6,7 @@ async function callGemini(apiKey: string, body: any, attempt: number = 1): Promi
   const fullPrompt = systemPrompt + "\n\n" + userMessage;
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
