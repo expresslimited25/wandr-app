@@ -640,7 +640,7 @@ function MyTripsPage({ trips, setPage, setCurrentTrip, onTripCreated }) {
 }
 
 // Plan
-function PlanPage({ setPage, onTripCreated }) {
+function PlanPage({ setPage, onTripCreated, generationsToday = 0, maxDailyGenerations = 3 }) {
   const [step, setStep] = useState(0);
   const [destination, setDestination] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -689,6 +689,25 @@ function PlanPage({ setPage, onTripCreated }) {
           </p>
           <div className="progress-track"><div className="progress-fill" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} /></div>
         </div>
+        {/* Daily usage counter */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", background: "var(--muted)", borderRadius: 8, border: "1px solid var(--border)" }}>
+          <p style={{ fontSize: 12, fontWeight: 600, color: "var(--muted-fg)", letterSpacing: ".03em" }}>
+            Daily generations
+          </p>
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            {Array.from({ length: maxDailyGenerations }).map((_, i) => (
+              <div key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: i < generationsToday ? "var(--accent)" : "var(--border)", transition: "background .2s" }} />
+            ))}
+            <p style={{ fontSize: 12, color: generationsToday >= maxDailyGenerations ? "var(--accent)" : "var(--muted-fg)", fontWeight: 600, marginLeft: 4 }}>
+              {generationsToday}/{maxDailyGenerations} used
+            </p>
+          </div>
+        </div>
+        {generationsToday >= maxDailyGenerations && (
+          <div style={{ background: "var(--accent-light)", border: "1px solid rgba(212,82,42,.3)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "var(--accent-dark)" }}>
+            <strong>Daily limit reached.</strong> You've used all {maxDailyGenerations} itinerary generations for today. Your limit resets at midnight.
+          </div>
+        )}
         {error && <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#991b1b" }}>{error}</div>}
         <div className="card p-6">
           {step === 0 && (
@@ -734,7 +753,7 @@ function PlanPage({ setPage, onTripCreated }) {
                   </div>
                 </div>
               ))}
-            </div>
+            </div>}
           )}
           {step === 3 && (
             <div className="space-y-4">
@@ -781,7 +800,7 @@ function PlanPage({ setPage, onTripCreated }) {
           <button className="btn btn-ghost" onClick={() => setStep(s => Math.max(0, s - 1))} disabled={step === 0}><Icon name="arrowLeft" size={15} /> Back</button>
           {step < STEPS.length - 1
             ? <button className="btn btn-primary" onClick={() => setStep(s => s + 1)} disabled={!canContinue}>Continue <Icon name="arrowRight" size={15} /></button>
-            : <button className="btn btn-amber" onClick={submit}><Icon name="sparkles" size={15} /> Generate itinerary</button>}
+            : <button className="btn btn-amber" onClick={submit} disabled={generationsToday >= maxDailyGenerations}><Icon name="sparkles" size={14} /> Generate itinerary</button>}
         </div>
       </div>
     </Shell>
@@ -1081,12 +1100,23 @@ function TripPage({ trip: initialTrip, setPage, onTripUpdated, onDeleteTrip, pen
               <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(200,178,125,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <Icon name="luggage" size={18} style={{ color: "var(--accent)" }} />
               </div>
-              <p className="modal-title" style={{ margin: 0 }}>Trip limit reached</p>
+              <p className="modal-title" style={{ margin: 0 }}>{pendingTrip?.rateLimited ? "Daily limit reached" : "Trip limit reached"}</p>
             </div>
-            <p className="text-sm text-muted" style={{ lineHeight: 1.6, marginBottom: 16 }}>
-              You have <strong>{maxTrips} saved trips</strong> — the maximum allowed. To save <strong>"{pendingTrip.title}"</strong>, delete one of your existing trips below.
-            </p>
-            <div className="space-y-2" style={{ marginBottom: 20 }}>
+            {pendingTrip?.rateLimited ? (
+              <div>
+                <p className="text-sm text-muted" style={{ lineHeight: 1.6, marginBottom: 12 }}>
+                  You've reached your <strong>daily limit of {maxTrips} itinerary generations</strong>. Your limit resets at midnight.
+                </p>
+                <div style={{ background: "var(--muted)", borderRadius: 8, padding: "12px 14px", fontSize: 13, color: "var(--muted-fg)" }}>
+                  Come back tomorrow to generate more itineraries — your saved trips are always available in My Trips.
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-muted" style={{ lineHeight: 1.6, marginBottom: 16 }}>
+                You have <strong>{maxTrips} saved trips</strong> — the maximum allowed. To save <strong>"{pendingTrip?.title}"</strong>, delete one of your existing trips below.
+              </p>
+            )}
+            {!pendingTrip?.rateLimited && <div className="space-y-2" style={{ marginBottom: 20 }}>
               {(trips || []).map(t => (
                 <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "10px 14px", background: "var(--muted)", borderRadius: 10 }}>
                   <div className="min-w-0">
@@ -1379,7 +1409,29 @@ export default function App({ session = null, supabase = null }) {
   const [trips, setTrips] = useState([]);
   const [tripsLoading, setTripsLoading] = useState(true);
   const [pendingTrip, setPendingTrip] = useState(null); // trip waiting to be saved when at limit
+  const [generationsToday, setGenerationsToday] = useState(() => {
+    if (typeof window === "undefined") return 0;
+    const userId = session?.user?.id || "guest";
+    const today = new Date().toISOString().slice(0, 10);
+    try { return parseInt(localStorage.getItem(`wandr.ratelimit.${userId}.${today}`) || "0", 10); } catch { return 0; }
+  });
   const MAX_TRIPS = 5;
+  const MAX_DAILY_GENERATIONS = 3;
+
+  // Rate limit helpers — stored in localStorage per user per day
+  function getRateLimitKey() {
+    const userId = session?.user?.id || "guest";
+    const today = new Date().toISOString().slice(0, 10);
+    return `wandr.ratelimit.${userId}.${today}`;
+  }
+  function getGenerationsToday() {
+    try { return parseInt(localStorage.getItem(getRateLimitKey()) || "0", 10); } catch { return 0; }
+  }
+  function incrementGenerations() {
+    const next = getGenerationsToday() + 1;
+    try { localStorage.setItem(getRateLimitKey(), String(next)); } catch {}
+    setGenerationsToday(next);
+  }
   const [currentTrip, setCurrentTrip] = useState(null);
 
   // Resolve screen state
@@ -1484,13 +1536,23 @@ export default function App({ session = null, supabase = null }) {
   }
 
   async function onTripCreated(trip) {
-    if (trips.length >= MAX_TRIPS) {
-      // At limit — show the trip limit modal instead of saving
-      setPendingTrip(trip);
-      setCurrentTrip(trip); // show preview
+    // Rate limit check — max generations per day
+    const genToday = getGenerationsToday();
+    if (genToday >= MAX_DAILY_GENERATIONS) {
+      // Show rate limit modal
+      setPendingTrip({ ...trip, rateLimited: true });
+      setCurrentTrip(trip);
       setPageRaw("trip");
       return;
     }
+    // Trip count limit check
+    if (trips.length >= MAX_TRIPS) {
+      setPendingTrip(trip);
+      setCurrentTrip(trip);
+      setPageRaw("trip");
+      return;
+    }
+    incrementGenerations();
     await saveTripToDb(trip);
   }
 
@@ -1568,7 +1630,7 @@ export default function App({ session = null, supabase = null }) {
   );
 
   if (page === "trip" && currentTrip) return <TripPage trip={currentTrip} setPage={setPage} onTripUpdated={onTripUpdated} onDeleteTrip={onDeleteTrip} pendingTrip={pendingTrip} trips={trips} onDeleteAndSavePending={onDeleteAndSavePending} onDiscardPending={onDiscardPending} maxTrips={MAX_TRIPS} />;
-  if (page === "plan") return <PlanPage setPage={setPage} onTripCreated={onTripCreated} />;
+  if (page === "plan") return <PlanPage setPage={setPage} onTripCreated={onTripCreated} generationsToday={generationsToday} maxDailyGenerations={MAX_DAILY_GENERATIONS} />;
   if (page === "mytrips") return <MyTripsPage trips={trips} setPage={setPage} setCurrentTrip={t => { setCurrentTrip(t); setPageRaw("trip"); }} onTripCreated={onTripCreated} />;
   if (page === "discover") return <DiscoverPage setPage={setPage} />;
   if (page === "profile") return <ProfilePage profile={profile} trips={trips} setPage={setPage} setCurrentTrip={t => { setCurrentTrip(t); setPageRaw("trip"); }} onLogout={onLogout} onDeleteTrip={onDeleteTrip} />;
