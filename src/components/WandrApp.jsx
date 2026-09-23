@@ -753,7 +753,7 @@ function PlanPage({ setPage, onTripCreated, generationsToday = 0, maxDailyGenera
                   </div>
                 </div>
               ))}
-            </div>}
+            </div>
           )}
           {step === 3 && (
             <div className="space-y-4">
