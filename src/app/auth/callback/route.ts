@@ -14,6 +14,6 @@ export async function GET(request: NextRequest) {
       await supabase.auth.exchangeCodeForSession(code);
     }
   }
-
-  return NextResponse.redirect(`${origin}/`);
+  // Redirect to /app after login
+  return NextResponse.redirect(`${origin}/app`);
 }
