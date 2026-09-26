@@ -1116,19 +1116,21 @@ function TripPage({ trip: initialTrip, setPage, onTripUpdated, onDeleteTrip, pen
                 You have <strong>{maxTrips} saved trips</strong> — the maximum allowed. To save <strong>"{pendingTrip?.title}"</strong>, delete one of your existing trips below.
               </p>
             )}
-            {!pendingTrip?.rateLimited && <div className="space-y-2" style={{ marginBottom: 20 }}>
-              {(trips || []).map(t => (
-                <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "10px 14px", background: "var(--muted)", borderRadius: 10 }}>
-                  <div className="min-w-0">
-                    <p className="font-medium truncate" style={{ fontSize: 13 }}>{t.title}</p>
-                    <p className="text-xs text-muted">{t.destination} · {formatRange(t.start_date, t.end_date)}</p>
+            {!pendingTrip?.rateLimited && (
+              <div className="space-y-2" style={{ marginBottom: 20 }}>
+                {(trips || []).map(t => (
+                  <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "10px 14px", background: "var(--muted)", borderRadius: 10 }}>
+                    <div className="min-w-0">
+                      <p className="font-medium truncate" style={{ fontSize: 13 }}>{t.title}</p>
+                      <p className="text-xs text-muted">{t.destination} · {formatRange(t.start_date, t.end_date)}</p>
+                    </div>
+                    <button className="btn btn-danger btn-sm shrink-0" onClick={() => onDeleteAndSavePending(t.id)}>
+                      <Icon name="trash" size={12} /> Delete & Save New
+                    </button>
                   </div>
-                  <button className="btn btn-danger btn-sm shrink-0" onClick={() => onDeleteAndSavePending(t.id)}>
-                    <Icon name="trash" size={12} /> Delete & Save New
-                  </button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
             <div className="modal-footer" style={{ marginTop: 0 }}>
               <button className="btn btn-outline btn-sm" onClick={onDiscardPending}>
                 Discard new trip
